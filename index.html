@@ -1,0 +1,1934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HexQuest</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0c1a0e;--bg2:#111f13;--surf:#162418;--surf2:#1e3020;
+  --bord:#2a4a2c;--grn:#1a5c2a;--grn2:#226b34;--grn3:#2e8a42;
+  --teal:#0e4a4a;--teal2:#126060;--teal3:#18807a;
+  --amb:#c47a10;--amb2:#e09020;--amb3:#f5b030;
+  --brn:#3a1e0a;--brn2:#5a3010;
+  --crm:#f0ead8;--crm2:#d8d0b8;--muted:#5a7a5c;
+  --red:#7a2010;--red2:#b03018;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'VT323',monospace;background:var(--bg);color:var(--crm);min-height:100vh;}
+::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--grn2)}
+.topnav{display:flex;align-items:center;padding:0 16px;background:var(--surf);border-bottom:3px solid var(--bord);position:sticky;top:0;z-index:100;height:52px;}
+.logo{font-family:'Press Start 2P',monospace;font-size:.72rem;color:var(--amb3);margin-right:20px;letter-spacing:2px;text-shadow:2px 2px 0 var(--grn3);white-space:nowrap;}
+.logo span{color:var(--teal3);}
+.tab-btn{padding:0 13px;height:52px;border:none;border-right:2px solid var(--bord);background:transparent;color:var(--muted);font-family:'Press Start 2P',monospace;font-size:.38rem;cursor:pointer;transition:all .1s;letter-spacing:1px;white-space:nowrap;}
+.tab-btn:first-of-type{border-left:2px solid var(--bord);}
+.tab-btn.active{background:var(--grn);color:var(--crm);}
+.tab-btn:hover:not(.active){background:var(--surf2);color:var(--crm2);}
+.screen{display:none;padding:20px;max-width:1200px;margin:0 auto;}
+.screen.active{display:block;}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border:2px solid transparent;background:var(--surf2);color:var(--crm);font-family:'Press Start 2P',monospace;font-size:.38rem;cursor:pointer;letter-spacing:1px;clip-path:polygon(6px 0%,calc(100% - 6px) 0%,100% 50%,calc(100% - 6px) 100%,6px 100%,0% 50%);transition:background .1s;white-space:nowrap;}
+.btn-g{background:var(--grn);color:var(--crm);}.btn-g:hover{background:var(--grn2);}
+.btn-t{background:var(--teal);color:var(--crm);}.btn-t:hover{background:var(--teal2);}
+.btn-a{background:var(--amb);color:var(--bg);}.btn-a:hover{background:var(--amb2);}
+.btn-r{background:var(--red);color:var(--crm);}.btn-r:hover{background:var(--red2);}
+.btn-o{background:transparent;border:2px solid var(--bord);color:var(--muted);}.btn-o:hover{border-color:var(--crm2);color:var(--crm);}
+.btn-sm{padding:4px 10px;font-size:.34rem;}
+.btn:disabled{opacity:.4;cursor:default;}
+.panel{background:var(--surf);border:2px solid var(--bord);padding:16px;margin-bottom:14px;}
+.ptitle{font-family:'Press Start 2P',monospace;font-size:.46rem;color:var(--amb3);margin-bottom:12px;letter-spacing:1px;text-transform:uppercase;border-bottom:2px solid var(--bord);padding-bottom:7px;}
+.field{margin-bottom:10px;}
+label{display:block;font-family:'Press Start 2P',monospace;font-size:.34rem;color:var(--muted);margin-bottom:4px;letter-spacing:1px;text-transform:uppercase;}
+input[type=text],input[type=number],textarea,select{width:100%;padding:7px 9px;background:var(--bg);border:2px solid var(--bord);color:var(--crm);font-family:'VT323',monospace;font-size:1rem;outline:none;transition:border-color .1s;}
+input[type=text]:focus,textarea:focus,select:focus{border-color:var(--amb3);}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%235a7a5c'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
+textarea{resize:vertical;min-height:65px;}
+.pr{display:flex;gap:7px;align-items:center;margin-bottom:5px;}.pr input{flex:1;}
+input[type=file]{display:none;}
+input[type=color]{width:38px;height:30px;border:2px solid var(--bord);cursor:pointer;background:none;padding:2px;}
+.el{display:grid;grid-template-columns:240px 1fr;gap:14px;}
+@media(max-width:680px){.el{grid-template-columns:1fr;}}
+.slist{display:flex;flex-direction:column;gap:5px;margin-bottom:10px;}
+.sit{padding:7px 11px;background:var(--surf2);border:2px solid var(--bord);cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:.92rem;transition:border-color .1s;clip-path:polygon(7px 0%,calc(100% - 7px) 0%,100% 50%,calc(100% - 7px) 100%,7px 100%,0% 50%);}
+.sit:hover,.sit.aset{border-color:var(--amb3);color:var(--amb3);}
+.sit small{color:var(--muted);font-size:.78rem;}
+.sbar{display:flex;gap:7px;align-items:center;margin-bottom:9px;}.sbar input{flex:1;}
+.qcard{background:var(--surf2);border:2px solid var(--bord);border-left:4px solid var(--grn3);padding:13px;margin-bottom:9px;}
+.qhd{display:flex;align-items:center;gap:9px;margin-bottom:9px;}
+.qnum{width:25px;height:25px;background:var(--grn);color:var(--crm);display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P',monospace;font-size:.38rem;flex-shrink:0;clip-path:polygon(5px 0%,calc(100% - 5px) 0%,100% 50%,calc(100% - 5px) 100%,5px 100%,0% 50%);}
+.qtag{font-family:'Press Start 2P',monospace;font-size:.3rem;color:var(--teal3);background:var(--surf);border:1px solid var(--teal2);padding:2px 6px;}
+.qtbar{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;}
+.qtbtn{padding:4px 8px;font-family:'Press Start 2P',monospace;font-size:.3rem;border:2px solid var(--bord);background:transparent;color:var(--muted);cursor:pointer;transition:all .1s;clip-path:polygon(5px 0%,calc(100% - 5px) 0%,100% 50%,calc(100% - 5px) 100%,5px 100%,0% 50%);}
+.qtbtn:hover,.qtbtn.sel{border-color:var(--teal3);color:var(--teal3);background:rgba(18,96,96,.2);}
+.iup{border:2px dashed var(--bord);padding:11px;text-align:center;cursor:pointer;transition:border-color .1s;margin-top:5px;}
+.iup:hover{border-color:var(--amb3);}
+.iup img{max-height:90px;margin-top:5px;}
+.iup p{color:var(--muted);font-size:.88rem;}
+.qcap{font-family:'Press Start 2P',monospace;font-size:.34rem;padding:5px 9px;margin-bottom:9px;display:none;}
+.qcap.warn{display:block;color:var(--amb3);background:rgba(196,122,16,.12);border:1px solid var(--amb);}
+.qcap.full{display:block;color:var(--red2);background:rgba(112,32,16,.12);border:1px solid var(--red);}
+/* CODE BADGE */
+.code-badge{text-align:center;padding:22px;background:var(--surf);border:3px solid var(--amb);margin-bottom:16px;}
+.code-big{font-family:'Press Start 2P',monospace;font-size:2rem;color:var(--amb3);letter-spacing:8px;text-shadow:3px 3px 0 var(--brn2);margin:10px 0;}
+.code-sub{font-size:.88rem;color:var(--muted);margin-bottom:14px;}
+/* STUDENT ENTRY */
+.entry-wrap{max-width:440px;margin:60px auto;text-align:center;}
+.entry-title{font-family:'Press Start 2P',monospace;font-size:1rem;color:var(--amb3);text-shadow:2px 2px 0 var(--grn3);margin-bottom:8px;line-height:1.8;}
+.entry-sub{color:var(--muted);font-size:.9rem;margin-bottom:28px;}
+.code-input{font-family:'Press Start 2P',monospace;font-size:1.4rem;letter-spacing:6px;text-align:center;padding:16px;width:100%;background:var(--bg2);border:3px solid var(--bord);color:var(--amb3);margin-bottom:14px;outline:none;}
+.code-input:focus{border-color:var(--amb3);}
+/* QUIZ */
+.quiz-wrap{max-width:640px;margin:0 auto;}
+.coin-bar{display:flex;align-items:center;gap:9px;padding:9px 14px;background:var(--surf);border:2px solid var(--bord);border-bottom:3px solid var(--amb);margin-bottom:13px;}
+.coin-count{font-family:'Press Start 2P',monospace;font-size:.72rem;color:var(--amb3);}
+.coin-lbl{font-size:.82rem;color:var(--muted);}
+.qprog-wrap{flex:1;background:var(--bg2);height:7px;border:1px solid var(--bord);}
+.qprog-fill{height:100%;background:var(--grn3);transition:width .3s;}
+.qprog-lbl{font-family:'Press Start 2P',monospace;font-size:.3rem;color:var(--muted);}
+.quiz-card{background:var(--surf);border:2px solid var(--bord);border-top:4px solid var(--teal3);padding:18px;margin-bottom:11px;}
+.qpanel-prompt,.quiz-prompt{font-size:1.15rem;color:var(--crm);margin-bottom:13px;line-height:1.5;border-left:3px solid var(--teal3);padding-left:9px;}
+.qimg{max-width:100%;margin-bottom:11px;border:2px solid var(--bord);}
+.chcs{display:flex;flex-direction:column;gap:5px;margin-bottom:11px;}
+.cbtn{padding:9px 12px;border:2px solid var(--bord);background:var(--surf2);color:var(--crm);font-family:'VT323',monospace;font-size:1.05rem;cursor:pointer;text-align:left;transition:all .1s;clip-path:polygon(7px 0%,calc(100% - 7px) 0%,100% 50%,calc(100% - 7px) 100%,7px 100%,0% 50%);}
+.cbtn:hover:not(:disabled){border-color:var(--teal3);background:rgba(18,128,122,.15);}
+.cbtn.correct{border-color:var(--amb3);background:rgba(196,122,16,.2);color:var(--amb3);}
+.cbtn.wrong{border-color:var(--red2);background:rgba(176,48,24,.2);color:var(--red2);}
+.tfrow{display:flex;gap:7px;margin-bottom:11px;}
+.tfbtn{flex:1;padding:11px;border:2px solid var(--bord);background:var(--surf2);color:var(--crm);font-family:'Press Start 2P',monospace;font-size:.4rem;cursor:pointer;transition:all .1s;}
+.tfbtn:hover:not(:disabled){border-color:var(--teal3);}
+.fin{font-size:1.05rem;padding:7px 9px;margin-bottom:7px;width:100%;background:var(--bg);border:2px solid var(--bord);color:var(--crm);font-family:'VT323',monospace;outline:none;}
+.fin:focus{border-color:var(--amb3);}
+.swds{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;}
+.wchp{padding:5px 9px;background:var(--surf2);border:2px solid var(--bord);cursor:pointer;font-size:.92rem;user-select:none;clip-path:polygon(5px 0%,calc(100% - 5px) 0%,100% 50%,calc(100% - 5px) 100%,5px 100%,0% 50%);transition:border-color .1s;}
+.wchp:hover{border-color:var(--grn3);}.wchp.placed{opacity:.3;pointer-events:none;}
+.sdrop{min-height:38px;border:2px dashed var(--bord);padding:6px;display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-bottom:8px;background:var(--bg2);}
+.pchp{padding:5px 9px;background:var(--grn);color:var(--crm);font-size:.92rem;cursor:pointer;clip-path:polygon(5px 0%,calc(100% - 5px) 0%,100% 50%,calc(100% - 5px) 100%,5px 100%,0% 50%);}
+.marc{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.mco{display:flex;flex-direction:column;gap:5px;}
+.mit{padding:7px 11px;border:2px solid var(--bord);background:var(--surf2);cursor:pointer;transition:all .1s;font-size:.92rem;clip-path:polygon(6px 0%,calc(100% - 6px) 0%,100% 50%,calc(100% - 6px) 100%,6px 100%,0% 50%);}
+.mit:hover{border-color:var(--amb2);}.mit.selected{border-color:var(--amb3);color:var(--amb3);}
+.mit.matched{border-color:var(--grn3);color:var(--grn3);pointer-events:none;}.mit.wmatch{border-color:var(--red2);}
+.cbnk{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;}
+.cit{padding:5px 9px;background:var(--surf2);border:2px solid var(--bord);cursor:pointer;font-size:.92rem;clip-path:polygon(5px 0%,calc(100% - 5px) 0%,100% 50%,calc(100% - 5px) 100%,5px 100%,0% 50%);transition:border-color .1s;}
+.cit:hover{border-color:var(--amb2);}
+.cara{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+.cbkt{flex:1;min-width:100px;border:2px solid var(--bord);padding:7px;background:var(--bg2);}
+.cbkt h4{font-family:'Press Start 2P',monospace;font-size:.3rem;color:var(--amb3);margin-bottom:5px;}
+.cdrp{min-height:32px;display:flex;flex-wrap:wrap;gap:3px;}
+.cdrpd{padding:3px 7px;background:rgba(196,122,16,.15);border:2px solid var(--amb);color:var(--amb3);font-size:.82rem;cursor:pointer;clip-path:polygon(4px 0%,calc(100% - 4px) 0%,100% 50%,calc(100% - 4px) 100%,4px 100%,0% 50%);}
+.mbtns{display:flex;gap:7px;margin-bottom:8px;}
+.mbc{flex:1;padding:11px;background:var(--grn);border:none;font-family:'Press Start 2P',monospace;font-size:.38rem;color:var(--crm);cursor:pointer;clip-path:polygon(6px 0%,calc(100% - 6px) 0%,100% 50%,calc(100% - 6px) 100%,6px 100%,0% 50%);}
+.mbc:hover{background:var(--grn2);}
+.mbw{flex:1;padding:11px;background:var(--red);border:none;font-family:'Press Start 2P',monospace;font-size:.38rem;color:var(--crm);cursor:pointer;clip-path:polygon(6px 0%,calc(100% - 6px) 0%,100% 50%,calc(100% - 6px) 100%,6px 100%,0% 50%);}
+.mbw:hover{background:var(--red2);}
+.ar{background:rgba(26,92,42,.2);border:2px solid var(--grn3);padding:7px 11px;margin-bottom:8px;color:var(--grn3);font-size:.9rem;display:none;}
+.qactions{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px;}
+.apa{margin-bottom:8px;}.apa audio{width:100%;}
+.coin-pop{position:fixed;pointer-events:none;font-family:'Press Start 2P',monospace;font-size:.62rem;color:var(--amb3);text-shadow:1px 1px 0 var(--brn);z-index:999;animation:crise 1.1s ease forwards;}
+@keyframes crise{0%{opacity:1;transform:translateY(0) scale(1);}100%{opacity:0;transform:translateY(-55px) scale(1.3);}}
+/* DUCK STORE */
+.store-wrap{max-width:780px;margin:0 auto;}
+.store-hdr{text-align:center;padding:20px;background:var(--surf);border:3px solid var(--amb);margin-bottom:16px;}
+.store-title{font-family:'Press Start 2P',monospace;font-size:.95rem;color:var(--amb3);text-shadow:3px 3px 0 var(--brn2);margin-bottom:7px;line-height:1.8;}
+.store-coins{font-family:'Press Start 2P',monospace;font-size:.6rem;color:var(--amb3);margin-bottom:3px;}
+.store-sub{font-size:.88rem;color:var(--muted);}
+.duck-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:18px;}
+.duck-card{background:var(--surf);border:2px solid var(--bord);padding:11px;text-align:center;cursor:pointer;transition:all .15s;position:relative;}
+.duck-card:hover:not(.owned):not(.pricey){border-color:var(--amb3);transform:translateY(-2px);}
+.duck-card.owned{border-color:var(--grn3);background:rgba(26,92,42,.2);cursor:default;}
+.duck-card.pricey{opacity:.4;cursor:not-allowed;}
+.duck-cvs{display:block;margin:0 auto 7px;image-rendering:pixelated;}
+.duck-name{font-family:'Press Start 2P',monospace;font-size:.3rem;color:var(--crm2);margin-bottom:3px;line-height:1.6;}
+.duck-cost{font-family:'Press Start 2P',monospace;font-size:.34rem;color:var(--amb3);}
+.duck-badge{position:absolute;top:5px;right:5px;background:var(--grn);color:var(--crm);font-family:'Press Start 2P',monospace;font-size:.26rem;padding:2px 4px;}
+.pond-wrap{background:var(--surf);border:3px solid var(--teal2);padding:16px;text-align:center;}
+.pond-title{font-family:'Press Start 2P',monospace;font-size:.42rem;color:var(--teal3);margin-bottom:11px;}
+.pond-ducks{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;min-height:56px;align-items:center;}
+.pond-empty{color:var(--muted);font-size:.82rem;}
+/* VOCAB */
+.vb-wrap{display:grid;grid-template-columns:1fr 300px;gap:14px;}
+@media(max-width:800px){.vb-wrap{grid-template-columns:1fr;}}
+.vocab-list{display:flex;flex-direction:column;gap:8px;max-height:65vh;overflow-y:auto;padding-right:4px;}
+.vcard{display:flex;gap:10px;background:var(--surf2);border:2px solid var(--bord);padding:10px;align-items:flex-start;}
+.vcard:hover{border-color:var(--grn3);}
+.vcard-img-wrap{flex-shrink:0;width:64px;text-align:center;}
+.vcard-img{width:60px;height:60px;object-fit:cover;border:2px solid var(--bord);}
+.vcard-no-img{width:60px;height:60px;border:2px dashed var(--bord);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.75rem;}
+.vcard-img-btn{display:block;margin-top:4px;background:var(--surf);border:1px solid var(--bord);color:var(--muted);font-size:.75rem;cursor:pointer;padding:2px 6px;text-align:center;}
+.vcard-img-btn:hover{color:var(--amb3);border-color:var(--amb);}
+.vcard-img-btn input{display:none;}
+.vcard-body{flex:1;display:flex;flex-direction:column;gap:5px;}
+.vcard-word{font-family:'Press Start 2P',monospace;font-size:.46rem;background:var(--bg);border:2px solid var(--grn);color:var(--amb3);padding:5px 7px;width:100%;outline:none;}
+.vcard-def{background:var(--bg);border:2px solid var(--bord);color:var(--crm);padding:5px 7px;font-family:'VT323',monospace;font-size:.95rem;width:100%;outline:none;}
+.vcard-def:focus{border-color:var(--amb3);}
+.vb-type-grid{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px;}
+.vb-type-lbl{display:flex;align-items:center;gap:5px;padding:4px 8px;border:2px solid var(--bord);background:var(--surf2);cursor:pointer;font-family:'Press Start 2P',monospace;font-size:.27rem;color:var(--muted);clip-path:polygon(4px 0%,calc(100% - 4px) 0%,100% 50%,calc(100% - 4px) 100%,4px 100%,0% 50%);}
+.vb-type-lbl:has(input:checked){border-color:var(--grn3);color:var(--grn3);background:rgba(26,92,42,.2);}
+/* AI GEN */
+.glay2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:720px){.glay2{grid-template-columns:1fr;}}
+.gopts{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px;}
+.gopt{padding:4px 7px;font-family:'Press Start 2P',monospace;font-size:.28rem;border:2px solid var(--bord);background:transparent;color:var(--muted);cursor:pointer;transition:all .1s;clip-path:polygon(4px 0%,calc(100% - 4px) 0%,100% 50%,calc(100% - 4px) 100%,4px 100%,0% 50%);}
+.gopt.on{border-color:var(--teal3);color:var(--teal3);background:rgba(18,96,96,.2);}
+.gprev{display:flex;flex-direction:column;gap:6px;max-height:55vh;overflow-y:auto;padding-right:3px;}
+.gqc{background:var(--surf2);border:2px solid var(--bord);border-left:3px solid var(--teal3);padding:8px;font-size:.86rem;line-height:1.5;}
+.gtag{display:inline-block;font-family:'Press Start 2P',monospace;font-size:.27rem;color:var(--teal3);border:1px solid var(--teal2);padding:1px 5px;margin-bottom:3px;}
+.gpmt{color:var(--crm);font-size:.86rem;margin-bottom:2px;}
+.gdet{color:var(--muted);font-size:.76rem;}
+.gstm{background:var(--bg);border:2px solid var(--bord);padding:8px;font-family:'VT323',monospace;font-size:.86rem;color:var(--grn3);min-height:45px;white-space:pre-wrap;margin-bottom:9px;max-height:110px;overflow-y:auto;}
+.pbw{background:var(--bg2);height:6px;margin-bottom:9px;border:2px solid var(--bord);}
+.pbi{height:100%;background:var(--grn3);transition:width .4s;}
+.itgl{display:flex;align-items:center;gap:7px;margin-bottom:9px;font-size:.86rem;color:var(--muted);}
+.itgl input{accent-color:var(--amb3);width:13px;height:13px;cursor:pointer;}
+.hidden{display:none!important;}
+.stitle{font-family:'Press Start 2P',monospace;font-size:.72rem;color:var(--amb3);margin-bottom:16px;text-shadow:2px 2px 0 var(--grn);}
+.notif{position:fixed;bottom:16px;right:16px;background:var(--grn);color:var(--crm);padding:8px 14px;font-family:'Press Start 2P',monospace;font-size:.38rem;z-index:9999;border:2px solid var(--grn3);animation:sup .2s ease;letter-spacing:1px;}
+@keyframes sup{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+</style>
+</head>
+<body>
+
+<div class="topnav" id="topnav">
+  <div class="logo">HEX<span>QUEST</span></div>
+  <button class="tab-btn active" onclick="showTab('editor',this)">EDITOR</button>
+  <button class="tab-btn" onclick="showTab('vocab',this)">VOCAB BANK</button>
+  <button class="tab-btn" onclick="showTab('generate',this)">AI GEN</button>
+</div>
+
+<!-- EDITOR -->
+<div class="screen active" id="screen-editor">
+  <div class="el">
+    <div>
+      <div class="panel">
+        <div class="ptitle">Question Sets</div>
+        <div class="slist" id="set-list"></div>
+        <button class="btn btn-g" style="width:100%;justify-content:center" onclick="newSet()">+ NEW SET</button>
+      </div>
+    </div>
+    <div>
+      <div class="panel" id="editor-empty" style="text-align:center;padding:40px 20px">
+        <p style="color:var(--muted);font-size:1rem">Select or create a set to begin.</p>
+      </div>
+      <div id="editor-content" class="hidden">
+        <div class="sbar">
+          <input type="text" id="set-name-input" placeholder="Set name...">
+          <button class="btn btn-g" onclick="saveCurrentSet()">SAVE</button>
+          <button class="btn btn-r btn-sm" onclick="deleteCurrentSet()">DEL</button>
+        </div>
+        <div id="q-cap-bar" class="qcap"></div>
+        <div class="qtbar" id="q-type-bar"></div>
+        <div id="questions-list"></div>
+        <button class="btn btn-o" id="add-q-btn" onclick="addQuestion(selectedType)">+ ADD QUESTION</button>
+        <div style="margin-top:16px;border-top:2px solid var(--bord);padding-top:14px">
+          <div class="ptitle">Publish & Share</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+            <label style="text-transform:none;letter-spacing:0;font-family:'VT323',monospace;font-size:1rem;color:var(--muted)">Coins per correct answer:</label>
+            <input type="number" id="pub-coins" value="10" min="1" max="100" style="width:70px">
+          </div>
+          <button class="btn btn-a" style="width:100%;justify-content:center;font-size:.45rem" onclick="publishSet()">PUBLISH & GET CODE</button>
+          <div id="code-result" class="hidden" style="margin-top:12px">
+            <div class="code-badge">
+              <div style="font-family:'Press Start 2P',monospace;font-size:.38rem;color:var(--muted);margin-bottom:6px">STUDENT CODE</div>
+              <div class="code-big" id="pub-code"></div>
+              <div class="code-sub">Students go to your website and enter this code</div>
+              <button class="btn btn-o btn-sm" style="margin:0 auto;display:inline-flex" onclick="copyCode()">COPY CODE</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VOCAB BANK -->
+<div class="screen" id="screen-vocab">
+  <div class="stitle">VOCAB BANK</div>
+  <div class="vb-wrap">
+    <div>
+      <div class="panel" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span id="vb-count" style="font-family:'Press Start 2P',monospace;font-size:.38rem;color:var(--amb3)">0 words</span>
+        <button class="btn btn-g btn-sm" onclick="addVocabCard()">+ ADD WORD</button>
+        <label class="btn btn-t btn-sm" style="cursor:pointer">IMPORT CSV<input type="file" accept=".csv,.txt" onchange="importVocabCSV(event)"></label>
+        <button class="btn btn-o btn-sm" onclick="clearVocabBank()">CLEAR ALL</button>
+        <span style="font-size:.82rem;color:var(--muted)">CSV: word, definition, translation, tag</span>
+      </div>
+      <div class="vocab-list" id="vocab-list"></div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="ptitle">Publish Vocab Quiz</div>
+        <div class="field"><label>Questions per quiz</label><input type="number" id="vb-q-count" value="20" min="5" max="60" style="width:80px"></div>
+        <div class="field"><label>Coins per correct answer</label><input type="number" id="vb-coins" value="10" min="1" max="100" style="width:80px"></div>
+        <div class="field">
+          <label>Question types</label>
+          <div class="vb-type-grid">
+            <label class="vb-type-lbl"><input type="checkbox" class="vb-type-cb" value="mc-def" checked> Word Meaning</label>
+            <label class="vb-type-lbl"><input type="checkbox" class="vb-type-cb" value="mc-image" checked> Image Match</label>
+            <label class="vb-type-lbl"><input type="checkbox" class="vb-type-cb" value="fill-blank" checked> Type the Word</label>
+            <label class="vb-type-lbl"><input type="checkbox" class="vb-type-cb" value="spell" checked> Spell It</label>
+            <label class="vb-type-lbl"><input type="checkbox" class="vb-type-cb" value="odd-one-out" checked> Odd One Out</label>
+            <label class="vb-type-lbl"><input type="checkbox" class="vb-type-cb" value="true-false" checked> True / False</label>
+            <label class="vb-type-lbl"><input type="checkbox" class="vb-type-cb" value="match" checked> Match Pairs</label>
+            <label class="vb-type-lbl"><input type="checkbox" class="vb-type-cb" value="dictation"> Dictation</label>
+          </div>
+        </div>
+        <button class="btn btn-a" style="width:100%;justify-content:center" onclick="publishVocabSet()">PUBLISH & GET CODE</button>
+        <div id="vb-code-result" class="hidden" style="margin-top:12px">
+          <div class="code-badge">
+            <div style="font-family:'Press Start 2P',monospace;font-size:.35rem;color:var(--muted);margin-bottom:6px">STUDENT CODE</div>
+            <div class="code-big" id="vb-pub-code"></div>
+            <div class="code-sub">Students enter this code on your website</div>
+            <button class="btn btn-o btn-sm" style="margin:0 auto;display:inline-flex" onclick="copyVocabCode()">COPY CODE</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AI GEN -->
+<div class="screen" id="screen-generate">
+  <div class="stitle">AI QUESTION GENERATOR</div>
+  <div class="glay2">
+    <div>
+      <div class="panel">
+        <div class="ptitle">Instructions</div>
+        <div class="field"><label>Topic / Theme</label><input type="text" id="gen-topic" placeholder="e.g. irregular past tense B1"></div>
+        <div class="field"><label>Extra details</label><textarea id="gen-details" placeholder="level, tone, context..."></textarea></div>
+        <div class="field"><label>Number of questions (max 60)</label><input type="number" id="gen-count" value="8" min="1" max="60" style="width:80px"></div>
+        <div class="field"><label>Question types</label><div class="gopts" id="gen-type-opts"></div></div>
+        <div class="itgl"><input type="checkbox" id="gen-images-toggle" checked>
+          <label for="gen-images-toggle" style="cursor:pointer;text-transform:none;letter-spacing:0;font-family:'VT323',monospace;font-size:1rem;color:var(--muted)">Auto-search images</label></div>
+        <button class="btn btn-g" style="width:100%;justify-content:center" id="gen-btn" onclick="runGenerate()">GENERATE</button>
+      </div>
+      <div class="panel" id="gen-status-panel" style="display:none">
+        <div class="ptitle">Progress</div>
+        <div class="pbw"><div class="pbi" id="gen-progress" style="width:0%"></div></div>
+        <div class="gstm" id="gen-stream">Waiting...</div>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:7px">
+          <div class="ptitle" style="margin:0">Generated</div>
+          <div style="display:flex;gap:7px;align-items:center">
+            <input type="text" id="gen-set-name" placeholder="Set name..." style="width:120px">
+            <button class="btn btn-a btn-sm" onclick="importGenerated()">IMPORT</button>
+          </div>
+        </div>
+        <div class="gprev" id="gen-preview"><p style="color:var(--muted);font-size:.88rem">Generated questions appear here.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STUDENT ENTRY (shown when ?student=1) -->
+<div class="screen" id="screen-entry">
+  <div class="entry-wrap">
+    <canvas id="duck-hero" width="112" height="112" style="display:block;margin:0 auto 20px;image-rendering:pixelated"></canvas>
+    <div class="entry-title">HEXQUEST</div>
+    <div class="entry-sub">Enter your 8-digit code to start!</div>
+    <input class="code-input" type="text" id="code-entry" maxlength="8" placeholder="00000000"
+      oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+      onkeydown="if(event.key==='Enter')loadByCode()">
+    <button class="btn btn-a" style="width:100%;justify-content:center;font-size:.5rem;padding:14px" onclick="loadByCode()">START QUIZ</button>
+    <p id="code-error" style="color:var(--red2);font-family:'Press Start 2P',monospace;font-size:.36rem;margin-top:10px;display:none">CODE NOT FOUND. TRY AGAIN.</p>
+  </div>
+</div>
+
+<!-- STUDENT QUIZ -->
+<div class="screen" id="screen-quiz">
+  <div class="quiz-wrap">
+    <div class="coin-bar">
+      <canvas id="coin-cvs" width="26" height="26" style="image-rendering:pixelated"></canvas>
+      <span class="coin-count" id="q-coins">0</span>
+      <span class="coin-lbl">coins</span>
+      <div class="qprog-wrap"><div class="qprog-fill" id="q-prog"></div></div>
+      <span class="qprog-lbl" id="q-prog-lbl">0/0</span>
+    </div>
+    <div class="quiz-card"><div id="quiz-q-content"><p style="color:var(--muted)">Loading...</p></div></div>
+  </div>
+</div>
+
+<!-- DUCK STORE -->
+<div class="screen" id="screen-store">
+  <div class="store-wrap">
+    <div class="store-hdr">
+      <div class="store-title">DUCK STORE</div>
+      <div class="store-coins" id="store-coin-lbl">0 coins</div>
+      <div class="store-sub">Spend your coins on ducks!</div>
+    </div>
+    <div class="duck-grid" id="duck-grid"></div>
+    <div class="pond-wrap">
+      <div class="pond-title">YOUR POND</div>
+      <div class="pond-ducks" id="pond"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL = 'https://pjenpkxrrxvqvkmuizef.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqZW5wa3hycnh2cXZrbXVpemVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwOTA5ODMsImV4cCI6MjA5NzY2Njk4M30.SmjnQ7bhf862dVcKQSXCA7qbp4e6uouXDODN5jgQsbo';
+
+async function supaFetch(path, opts={}) {
+  const res = await fetch(SUPA_URL + '/rest/v1/' + path, {
+    ...opts,
+    headers: {
+      'apikey': SUPA_KEY,
+      'Authorization': 'Bearer ' + SUPA_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation',
+      ...(opts.headers||{})
+    }
+  });
+  if (!res.ok) throw new Error(await res.text());
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+function genCode() {
+  return String(Math.floor(10000000 + Math.random() * 90000000));
+}
+
+// ── DATA ─────────────────────────────────────────────────────────
+let sets = JSON.parse(localStorage.getItem('hq_sets') || '[]');
+let currentSetIdx = null, selectedType = 'multiple-choice';
+const MAX_Q = 60;
+
+const TYPES = [
+  {id:'multiple-choice',   label:'Multiple Choice'},
+  {id:'true-false',        label:'True/False'},
+  {id:'fill-blank',        label:'Fill Blank'},
+  {id:'unscramble',        label:'Unscramble'},
+  {id:'match-opposites',   label:'Match Opposites'},
+  {id:'connections',       label:'Connections'},
+  {id:'correct-sentence',  label:'Correct Sentence'},
+  {id:'categorise',        label:'Categorise'},
+  {id:'dictation',         label:'Dictation'},
+  {id:'write-sentence',    label:'Write Sentence'},
+  {id:'sentence-context',  label:'Sentence in Context'},
+  {id:'neanderthal',       label:'Neanderthal English'},
+  {id:'spot-difference',   label:'Spot the Difference'},
+  {id:'odd-one-out',       label:'Odd One Out'},
+  {id:'repeat-sentence',   label:'Repeat Sentence'},
+  {id:'conjugate',         label:'Conjugate the Verb'},
+  {id:'spell-word',        label:'Spell the Word'},
+  {id:'rhyme',             label:'Find a Rhyme'},
+  {id:'identify-mistake',  label:'Identify the Mistake'},
+  {id:'complete-sentence', label:'Complete the Sentence'},
+];
+
+function showTab(id, el) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+  if (id === 'vocab') initVocabTab();
+}
+
+// ── EDITOR ───────────────────────────────────────────────────────
+// ── EDITOR ────────────────────────────────────────────────────────────────────
+function initEditor() {
+  const bar = document.getElementById('q-type-bar'); bar.innerHTML = '';
+  TYPES.forEach(t => {
+    const b = document.createElement('button'); b.className = 'qtbtn' + (t.id === selectedType ? ' sel' : '');
+    b.textContent = t.label;
+    b.onclick = () => { selectedType = t.id; document.querySelectorAll('.qtbtn').forEach(x => x.classList.remove('sel')); b.classList.add('sel'); };
+    bar.appendChild(b);
+  });
+  renderSetList();
+}
+function renderSetList() {
+  const el = document.getElementById('set-list'); el.innerHTML = '';
+  if (!sets.length) { el.innerHTML = '<p style="color:var(--muted);font-size:.9rem">No sets yet.</p>'; return; }
+  sets.forEach((s, i) => {
+    const d = document.createElement('div'); d.className = 'sit' + (i === currentSetIdx ? ' aset' : '');
+    d.innerHTML = `<span>${s.name || 'Untitled'}</span><small>${s.questions.length}q</small>`;
+    d.onclick = () => loadSet(i); el.appendChild(d);
+  });
+}
+function loadSet(i) { currentSetIdx = i; document.getElementById('editor-empty').classList.add('hidden'); document.getElementById('editor-content').classList.remove('hidden'); document.getElementById('set-name-input').value = sets[i].name || ''; renderQuestions(); renderSetList(); }
+function newSet() { sets.push({ name: 'New Set', questions: [] }); currentSetIdx = sets.length - 1; saveAll(); loadSet(currentSetIdx); }
+function saveCurrentSet() { if (currentSetIdx === null) return; sets[currentSetIdx].name = document.getElementById('set-name-input').value || 'Untitled'; saveAll(); notify('SAVED'); }
+function deleteCurrentSet() { if (currentSetIdx === null || !confirm('Delete?')) return; sets.splice(currentSetIdx, 1); currentSetIdx = null; saveAll(); document.getElementById('editor-empty').classList.remove('hidden'); document.getElementById('editor-content').classList.add('hidden'); }
+function saveAll() { localStorage.setItem('hq_sets', JSON.stringify(sets)); renderSetList(); }
+function addQuestion(type) {
+  if (currentSetIdx === null) return;
+  const q = { type, prompt: '', image: null };
+  if (type === 'multiple-choice') { q.choices = ['', '', '', '']; q.answer = 0; }
+  if (type === 'true-false') q.answer = 'true';
+  if (type === 'fill-blank') q.answer = '';
+  if (type === 'unscramble') q.sentence = '';
+  if (type === 'match-opposites') q.pairs = [['', ''], ['', ''], ['', '']];
+  if (type === 'connections') q.pairs = [['', ''], ['', ''], ['', ''], ['', '']];
+  if (type === 'correct-sentence') { q.sentence = ''; q.correction = ''; }
+  if (type === 'categorise') { q.categories = ['', '']; q.items = []; }
+  if (type === 'dictation') { q.audioData = null; q.answer = ''; }
+  if (type === 'write-sentence')    q.wordPrompt = '';
+  if (type === 'sentence-context')  { q.sentence = ''; }
+  if (type === 'neanderthal')       { q.ugly = ''; q.correction = ''; }
+  if (type === 'spot-difference')   { q.sentenceA = ''; q.sentenceB = ''; q.differences = ''; }
+  if (type === 'odd-one-out')       { q.items = ['','','','','']; q.oddIdx = 0; q.explanation = ''; }
+  if (type === 'repeat-sentence')   { q.sentence = ''; q.delay = 3; }
+  if (type === 'conjugate')         { q.verb = ''; q.subject = ''; q.tense = ''; q.answer = ''; }
+  if (type === 'spell-word')        { q.word = ''; q.audioData = null; }
+  if (type === 'rhyme')             { q.word = ''; q.audioData = null; q.acceptedRhymes = ''; }
+  if (type === 'identify-mistake')  { q.sentence = ''; q.mistake = ''; q.correction = ''; }
+  if (type === 'complete-sentence') { q.sentence = ''; q.answer = ''; }
+  sets[currentSetIdx].questions.push(q); renderQuestions();
+}
+function removeQuestion(i) { sets[currentSetIdx].questions.splice(i, 1); renderQuestions(); }
+function renderQuestions() {
+  const list = document.getElementById('questions-list'); list.innerHTML = '';
+  sets[currentSetIdx].questions.forEach((q, i) => {
+    const card = document.createElement('div'); card.className = 'qcard';
+    card.innerHTML = `<div class="qhd"><div class="qnum">${i+1}</div><div class="qtag">${TYPES.find(t=>t.id===q.type)?.label}</div><button class="btn btn-r btn-sm" style="margin-left:auto" onclick="removeQuestion(${i})">DEL</button></div>${buildFields(q, i)}`;
+    list.appendChild(card);
+  });
+}
+
+
+
+const _origAdd = addQuestion;
+function addQuestion(type) {
+  if (currentSetIdx === null) return;
+  if (sets[currentSetIdx].questions.length >= MAX_Q) { notify('MAX 60 QUESTIONS!'); return; }
+  _origAdd(type); updateCapBar();
+}
+const _origRemove = removeQuestion;
+function removeQuestion(i) { _origRemove(i); updateCapBar(); }
+const _origLoad = loadSet;
+function loadSet(i) { _origLoad(i); updateCapBar(); }
+
+function updateCapBar() {
+  if (currentSetIdx === null) return;
+  const n = sets[currentSetIdx].questions.length;
+  const bar = document.getElementById('q-cap-bar');
+  const btn = document.getElementById('add-q-btn');
+  bar.className = 'qcap';
+  if (n >= MAX_Q) { bar.classList.add('full'); bar.textContent=n+'/60 MAX REACHED'; btn.disabled=true; btn.style.opacity='.4'; }
+  else if (n >= 50) { bar.classList.add('warn'); bar.textContent=n+'/60 questions'; btn.disabled=false; btn.style.opacity=''; }
+  else { bar.style.display='none'; btn.disabled=false; btn.style.opacity=''; return; }
+  bar.style.display='block';
+}
+
+function buildFields(q, i) {
+  const img = `<div class="field"><label>Image</label><div class="iup" onclick="document.getElementById('img-${i}').click()">${q.image ? `<img src="${q.image}" alt="">` : '<p>[ click to upload ]</p>'}</div><input type="file" id="img-${i}" accept="image/*" onchange="upImg(event,${i})"></div>`;
+  const pf = `<div class="field"><label>Prompt</label><input type="text" value="${esc(q.prompt)}" oninput="sets[currentSetIdx].questions[${i}].prompt=this.value"></div>`;
+  if (q.type === 'multiple-choice') return pf + img + `<div class="field"><label>Choices</label>${q.choices.map((c, ci) => `<div class="pr"><input type="radio" name="ans-${i}" ${q.answer===ci?'checked':''} onchange="sets[currentSetIdx].questions[${i}].answer=${ci}" style="accent-color:var(--pur3);width:14px;height:14px"><input type="text" value="${esc(c)}" placeholder="Choice ${ci+1}" oninput="sets[currentSetIdx].questions[${i}].choices[${ci}]=this.value"></div>`).join('')}</div>`;
+  if (q.type === 'true-false') return pf + img + `<div class="field"><label>Answer</label><div style="display:flex;gap:12px"><label style="display:flex;gap:6px;align-items:center;color:var(--wht);font-family:'VT323',monospace;font-size:1rem;text-transform:none;letter-spacing:0"><input type="radio" name="tf-${i}" ${q.answer==='true'?'checked':''} onchange="sets[currentSetIdx].questions[${i}].answer='true'" style="accent-color:var(--pur3)"> True</label><label style="display:flex;gap:6px;align-items:center;color:var(--wht);font-family:'VT323',monospace;font-size:1rem;text-transform:none;letter-spacing:0"><input type="radio" name="tf-${i}" ${q.answer==='false'?'checked':''} onchange="sets[currentSetIdx].questions[${i}].answer='false'" style="accent-color:var(--red2)"> False</label></div></div>`;
+  if (q.type === 'fill-blank') return `<div class="field"><label>Sentence (use ___)</label><input type="text" value="${esc(q.prompt)}" oninput="sets[currentSetIdx].questions[${i}].prompt=this.value" placeholder="She ___ to school."></div><div class="field"><label>Answer</label><input type="text" value="${esc(q.answer)}" oninput="sets[currentSetIdx].questions[${i}].answer=this.value"></div>` + img;
+  if (q.type === 'unscramble') return pf + `<div class="field"><label>Correct Sentence</label><input type="text" value="${esc(q.sentence)}" oninput="sets[currentSetIdx].questions[${i}].sentence=this.value"></div>` + img;
+  if (q.type === 'match-opposites' || q.type === 'connections') { const lbl = q.type === 'match-opposites' ? 'Pairs (word - opposite)' : 'Pairs (item - category)'; return pf + `<div class="field"><label>${lbl}</label>${q.pairs.map((p, pi) => `<div class="pr"><input type="text" value="${esc(p[0])}" placeholder="Left" oninput="sets[currentSetIdx].questions[${i}].pairs[${pi}][0]=this.value"><span style="color:var(--muted)">-</span><input type="text" value="${esc(p[1])}" placeholder="Right" oninput="sets[currentSetIdx].questions[${i}].pairs[${pi}][1]=this.value"><button class="btn btn-r btn-sm" onclick="removePair(${i},${pi})">X</button></div>`).join('')}<button class="btn btn-g btn-sm" style="margin-top:6px" onclick="addPair(${i})">+ PAIR</button></div>` + img; }
+  if (q.type === 'correct-sentence') return `<div class="field"><label>Incorrect Sentence</label><input type="text" value="${esc(q.sentence)}" oninput="sets[currentSetIdx].questions[${i}].sentence=this.value"></div><div class="field"><label>Correct Version</label><input type="text" value="${esc(q.correction)}" oninput="sets[currentSetIdx].questions[${i}].correction=this.value"></div>` + img;
+  if (q.type === 'categorise') return `<div class="field"><label>Categories (comma separated)</label><input type="text" value="${esc(q.categories.join(', '))}" oninput="sets[currentSetIdx].questions[${i}].categories=this.value.split(',').map(s=>s.trim())"></div><div class="field"><label>Items (word:category per line)</label><textarea oninput="parseCat(${i},this.value)" placeholder="apple:Fruit&#10;dog:Animal">${(q.items||[]).map(it=>it.word+':'+it.cat).join('\n')}</textarea></div>` + pf + img;
+  if (q.type === 'dictation') return `<div class="field"><label>Audio</label><div class="iup" onclick="document.getElementById('aud-${i}').click()">${q.audioData ? `<audio controls src="${q.audioData}" style="width:100%"></audio>` : '<p>[ click to upload audio ]</p>'}</div><input type="file" id="aud-${i}" accept="audio/*" onchange="upAud(event,${i})"></div><div class="field"><label>Transcript</label><input type="text" value="${esc(q.answer)}" oninput="sets[currentSetIdx].questions[${i}].answer=this.value"></div>`;
+  if (q.type === 'write-sentence') return `<div class="field"><label>Prompt Word</label><input type="text" value="${esc(q.wordPrompt)}" oninput="sets[currentSetIdx].questions[${i}].wordPrompt=this.value"></div><div class="field"><label>Example</label><input type="text" value="${esc(q.prompt)}" oninput="sets[currentSetIdx].questions[${i}].prompt=this.value"></div>` + img;
+
+  if (q.type === 'sentence-context') return `
+    <div class="field"><label>Sentence to put in context</label><input type="text" value="${esc(q.sentence)}" oninput="sets[currentSetIdx].questions[${i}].sentence=this.value" placeholder="e.g. Despite the rain, she smiled."></div>
+    ${pf}${img}`;
+
+  if (q.type === 'neanderthal') return `
+    <div class="field"><label>Neanderthal version</label><input type="text" value="${esc(q.ugly)}" oninput="sets[currentSetIdx].questions[${i}].ugly=this.value" placeholder="e.g. Me go store yesterday buy food"></div>
+    <div class="field"><label>Correct version</label><input type="text" value="${esc(q.correction)}" oninput="sets[currentSetIdx].questions[${i}].correction=this.value"></div>${img}`;
+
+  if (q.type === 'spot-difference') return `
+    <div class="field"><label>Sentence A</label><input type="text" value="${esc(q.sentenceA)}" oninput="sets[currentSetIdx].questions[${i}].sentenceA=this.value"></div>
+    <div class="field"><label>Sentence B</label><input type="text" value="${esc(q.sentenceB)}" oninput="sets[currentSetIdx].questions[${i}].sentenceB=this.value"></div>
+    <div class="field"><label>Differences to reveal (shown after)</label><textarea oninput="sets[currentSetIdx].questions[${i}].differences=this.value" placeholder="1. Tense changed&#10;2. Article removed">${esc(q.differences)}</textarea></div>${img}`;
+
+  if (q.type === 'odd-one-out') return `
+    <div class="field"><label>Items (one is the odd one out)</label>
+    ${(q.items||['','','','','']).map((it,ii) => `<div class="pr">
+      <input type="radio" name="odd-${i}" ${q.oddIdx===ii?'checked':''} onchange="sets[currentSetIdx].questions[${i}].oddIdx=${ii}" style="accent-color:var(--yel);width:14px;height:14px">
+      <input type="text" value="${esc(it)}" placeholder="Item ${ii+1}" oninput="sets[currentSetIdx].questions[${i}].items[${ii}]=this.value">
+    </div>`).join('')}
+    </div>
+    <div class="field"><label>Why it's odd (shown after)</label><input type="text" value="${esc(q.explanation)}" oninput="sets[currentSetIdx].questions[${i}].explanation=this.value"></div>
+    ${pf}${img}`;
+
+  if (q.type === 'repeat-sentence') return `
+    <div class="field"><label>Sentence to repeat</label><input type="text" value="${esc(q.sentence)}" oninput="sets[currentSetIdx].questions[${i}].sentence=this.value" placeholder="e.g. She had been studying all night."></div>
+    <div class="field"><label>Show for (seconds)</label><input type="number" value="${q.delay||3}" min="1" max="10" style="width:80px" oninput="sets[currentSetIdx].questions[${i}].delay=+this.value"></div>${img}`;
+
+  if (q.type === 'conjugate') return `
+    <div class="field"><label>Verb (infinitive)</label><input type="text" value="${esc(q.verb)}" oninput="sets[currentSetIdx].questions[${i}].verb=this.value" placeholder="to go"></div>
+    <div class="field"><label>Subject / Context</label><input type="text" value="${esc(q.subject)}" oninput="sets[currentSetIdx].questions[${i}].subject=this.value" placeholder="she"></div>
+    <div class="field"><label>Tense</label><input type="text" value="${esc(q.tense)}" oninput="sets[currentSetIdx].questions[${i}].tense=this.value" placeholder="past simple"></div>
+    <div class="field"><label>Correct answer</label><input type="text" value="${esc(q.answer)}" oninput="sets[currentSetIdx].questions[${i}].answer=this.value" placeholder="went"></div>${img}`;
+
+  if (q.type === 'spell-word') return `
+    <div class="field"><label>Word to spell</label><input type="text" value="${esc(q.word)}" oninput="sets[currentSetIdx].questions[${i}].word=this.value" placeholder="necessary"></div>
+    <div class="field"><label>Audio (optional — or use TTS)</label>
+      <div class="iup" onclick="document.getElementById('aud-${i}').click()">${q.audioData?`<audio controls src="${q.audioData}" style="width:100%"></audio>`:'<p>[ upload audio or TTS will be used ]</p>'}</div>
+      <input type="file" id="aud-${i}" accept="audio/*" onchange="upAud(event,${i})"></div>${img}`;
+
+  if (q.type === 'rhyme') return `
+    <div class="field"><label>Word to rhyme with</label><input type="text" value="${esc(q.word)}" oninput="sets[currentSetIdx].questions[${i}].word=this.value" placeholder="cat"></div>
+    <div class="field"><label>Accepted rhymes (comma separated)</label><input type="text" value="${esc(q.acceptedRhymes)}" oninput="sets[currentSetIdx].questions[${i}].acceptedRhymes=this.value" placeholder="bat, hat, mat, sat, rat"></div>
+    <div class="field"><label>Audio (optional)</label>
+      <div class="iup" onclick="document.getElementById('aud-${i}').click()">${q.audioData?`<audio controls src="${q.audioData}" style="width:100%"></audio>`:'<p>[ upload or TTS will play the word ]</p>'}</div>
+      <input type="file" id="aud-${i}" accept="audio/*" onchange="upAud(event,${i})"></div>${img}`;
+
+  if (q.type === 'identify-mistake') return `
+    <div class="field"><label>Sentence with mistake</label><input type="text" value="${esc(q.sentence)}" oninput="sets[currentSetIdx].questions[${i}].sentence=this.value" placeholder="She don't like coffee."></div>
+    <div class="field"><label>The mistake (what's wrong)</label><input type="text" value="${esc(q.mistake)}" oninput="sets[currentSetIdx].questions[${i}].mistake=this.value" placeholder="don't should be doesn't"></div>
+    <div class="field"><label>Corrected sentence</label><input type="text" value="${esc(q.correction)}" oninput="sets[currentSetIdx].questions[${i}].correction=this.value"></div>${img}`;
+
+  if (q.type === 'complete-sentence') return `
+    <div class="field"><label>Sentence stem</label><input type="text" value="${esc(q.sentence)}" oninput="sets[currentSetIdx].questions[${i}].sentence=this.value" placeholder="By the time she arrived, they had already ___"></div>
+    <div class="field"><label>Accepted completion</label><input type="text" value="${esc(q.answer)}" oninput="sets[currentSetIdx].questions[${i}].answer=this.value" placeholder="left / gone home / finished"></div>${pf}${img}`;
+
+  return pf;
+}
+
+
+
+function addPair(qi) { sets[currentSetIdx].questions[qi].pairs.push(['', '']); renderQuestions(); }
+function removePair(qi, pi) { sets[currentSetIdx].questions[qi].pairs.splice(pi, 1); renderQuestions(); }
+function parseCat(qi, val) { sets[currentSetIdx].questions[qi].items = val.split('\n').filter(l => l.includes(':')).map(l => { const [w, ...r] = l.split(':'); return { word: w.trim(), cat: r.join(':').trim() }; }); }
+
+
+
+function upImg(event, qi) { const f = event.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = e => { sets[currentSetIdx].questions[qi].image = e.target.result; renderQuestions(); }; r.readAsDataURL(f); }
+function upAud(event, qi) { const f = event.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = e => { sets[currentSetIdx].questions[qi].audioData = e.target.result; renderQuestions(); }; r.readAsDataURL(f); }
+
+
+
+function esc(s) { return (s || '').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+
+
+
+
+// ── PUBLISH ──────────────────────────────────────────────────────
+async function publishSet() {
+  if (currentSetIdx === null) return;
+  const set = sets[currentSetIdx];
+  if (!set.questions.length) { notify('ADD QUESTIONS FIRST'); return; }
+  const btn = document.querySelector('[onclick="publishSet()"]');
+  btn.disabled = true; btn.textContent = 'PUBLISHING...';
+  try {
+    const code = genCode();
+    const coins = parseInt(document.getElementById('pub-coins').value) || 10;
+    await supaFetch('question_sets', {
+      method: 'POST',
+      body: JSON.stringify({ code, name: set.name, questions: set.questions, coins_per_q: coins })
+    });
+    set.code = code;
+    saveAll();
+    document.getElementById('pub-code').textContent = code;
+    document.getElementById('code-result').classList.remove('hidden');
+    notify('PUBLISHED!');
+  } catch(e) { notify('ERROR: ' + e.message); }
+  btn.disabled=false; btn.textContent='PUBLISH & GET CODE';
+}
+
+function copyCode() {
+  const code = document.getElementById('pub-code').textContent;
+  navigator.clipboard.writeText(code).then(()=>notify('CODE COPIED!')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=code;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();notify('CODE COPIED!');
+  });
+}
+
+// ── STUDENT MODE ─────────────────────────────────────────────────
+let quiz = {};
+function currentQ() { return quiz.questions ? quiz.questions[quiz.idx] : {}; }
+
+function initStudentMode() {
+  const params = new URLSearchParams(window.location.search);
+  if (!params.has('student')) return false;
+  document.getElementById('topnav').style.display = 'none';
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-entry').classList.add('active');
+  drawHeroDuck();
+  drawCoin();
+  return true;
+}
+
+function drawHeroDuck() {
+  const c = document.getElementById('duck-hero'); if(!c) return;
+  const duck = {id:'mallard', pal:['#3a7a28','#1a5020','#e09020','#c8c040']};
+  drawDuck(c, duck, 112);
+}
+
+async function loadByCode() {
+  const code = document.getElementById('code-entry').value.trim();
+  if (code.length !== 8) { showCodeError(); return; }
+  const errEl = document.getElementById('code-error');
+  errEl.style.display = 'none';
+  try {
+    const rows = await supaFetch('question_sets?code=eq.' + code + '&select=*');
+    if (!rows || !rows.length) { showCodeError(); return; }
+    const data = rows[0];
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById('screen-quiz').classList.add('active');
+    startQuiz({ questions: data.questions, coins: data.coins_per_q, name: data.name });
+  } catch(e) { showCodeError(); }
+}
+
+function showCodeError() {
+  document.getElementById('code-error').style.display = 'block';
+}
+
+function startQuiz(data) {
+  drawCoin();
+  quiz = { questions: shuffle([...data.questions]), idx:0, coins:0, perQ:data.coins||10, total:data.questions.length, owned:[] };
+  updateBar(); showQ();
+}
+
+function updateBar() {
+  document.getElementById('q-coins').textContent = quiz.coins;
+  const pct = quiz.total ? Math.round((quiz.idx/quiz.total)*100) : 0;
+  document.getElementById('q-prog').style.width = pct+'%';
+  document.getElementById('q-prog-lbl').textContent = quiz.idx+'/'+quiz.total;
+}
+
+function onCorrect() { quiz.coins+=quiz.perQ; updateBar(); popCoin(); setTimeout(()=>advance(),700); }
+function onWrong()   { advance(); }
+function advance()   { quiz.idx++; updateBar(); if(quiz.idx>=quiz.total) openStore(); else showQ(); }
+function showQ()     { renderQuestion(currentQ(), document.getElementById('quiz-q-content')); }
+
+function popCoin() {
+  const bar=document.getElementById('q-coins').getBoundingClientRect();
+  const p=document.createElement('div'); p.className='coin-pop';
+  p.textContent='+'+quiz.perQ;
+  p.style.cssText=`left:${bar.left}px;top:${bar.top+window.scrollY}px`;
+  document.body.appendChild(p); setTimeout(()=>p.remove(),1300);
+}
+
+// ── QUESTION RENDERER ────────────────────────────────────────────
+function renderQuestion(q, container) {
+  const el = container || document.getElementById('quiz-q-content');
+  const im = q.image ? `<img class="qimg" src="${q.image}" alt="">` : '';
+  const nav = (extra='') => `<div class="qactions">${extra}<button class="btn btn-r btn-sm" onclick="onWrong()">WRONG / PASS</button></div>`;
+
+  let html = '';
+  if (q.type === 'multiple-choice') {
+    html = `${im}<div class="qpanel-prompt">${q.prompt||'Choose:'}</div><div class="chcs">${q.choices.map((c,i)=>`<button class="cbtn" onclick="checkMC(this,${i},${q.answer})">${c}</button>`).join('')}</div><div class="ar" id="ar">CORRECT: ${q.choices[q.answer]}</div>${nav()}`;
+  } else if (q.type === 'true-false') {
+    html = `${im}<div class="qpanel-prompt">${q.prompt}</div><div class="tfrow"><button class="tfbtn" onclick="checkTF(this,'true','${q.answer}')">TRUE</button><button class="tfbtn" onclick="checkTF(this,'false','${q.answer}')">FALSE</button></div><div class="ar" id="ar">ANSWER: ${q.answer==='true'?'TRUE':'FALSE'}</div>${nav()}`;
+  } else if (q.type === 'fill-blank') {
+    const pts = q.prompt.split('___');
+    html = `${im}<div class="qpanel-prompt">${pts[0]}<span style="background:var(--border);padding:2px 12px;color:var(--muted)">___</span>${pts[1]||''}</div><input class="fin" type="text" id="fill-in" placeholder="Answer..." onkeydown="if(event.key==='Enter')checkFill()"><div class="ar" id="ar">ANSWER: ${q.answer}</div>${nav(`<button class="btn btn-p btn-sm" onclick="checkFill()">CHECK</button>`)}`;
+  } else if (q.type === 'unscramble') {
+    const ws = shuffle(q.sentence.split(' ').filter(Boolean));
+    window._us = { placed: [], target: q.sentence };
+    html = `${im}<div class="qpanel-prompt">${q.prompt||'Arrange:'}</div><div class="sdrop" id="sent-drop"></div><div class="swds" id="sent-bank">${ws.map((w,i)=>`<div class="wchp" id="wc-${i}" onclick="placeWord('${w}',${i})">${w}</div>`).join('')}</div><div class="ar" id="ar">CORRECT: ${q.sentence}</div>${nav(`<button class="btn btn-p btn-sm" onclick="checkUs()">CHECK</button>`)}`;
+  } else if (q.type === 'match-opposites' || q.type === 'connections') {
+    const L = shuffle(q.pairs.map(p=>p[0])), R = shuffle(q.pairs.map(p=>p[1]));
+    window._mt = { pairs: q.pairs, sel: null, side: null, matched: 0, total: q.pairs.length };
+    html = `${im}<div class="qpanel-prompt">${q.prompt||(q.type==='match-opposites'?'Match opposites:':'Match connections:')}</div><div class="marc"><div class="mco">${L.map(w=>`<div class="mit" data-word="${w}" data-side="L" onclick="matchClick(this)">${w}</div>`).join('')}</div><div class="mco">${R.map(w=>`<div class="mit" data-word="${w}" data-side="R" onclick="matchClick(this)">${w}</div>`).join('')}</div></div><div class="ar" id="ar">PAIRS: ${q.pairs.map(p=>p[0]+'-'+p[1]).join(' | ')}</div>${nav()}`;
+  } else if (q.type === 'correct-sentence') {
+    html = `${im}<div class="qpanel-prompt" style="color:var(--red2);text-decoration:line-through">${q.sentence}</div><input class="fin" type="text" id="fill-in" placeholder="Correct version..." onkeydown="if(event.key==='Enter')checkCorrect()"><div class="ar" id="ar">CORRECT: ${q.correction}</div>${nav(`<button class="btn btn-p btn-sm" onclick="checkCorrect()">CHECK</button>`)}`;
+  } else if (q.type === 'categorise') {
+    const its = shuffle((q.items||[]).map(it=>it.word));
+    window._ct = { correct: q.items, placed: {} }; window._csi = null;
+    html = `${im}<div class="qpanel-prompt">${q.prompt||'Sort:'}</div><div class="cbnk" id="cat-bank">${its.map(w=>`<div class="cit" id="ci-${w.replace(/\s/g,'_')}" onclick="selCat('${w}')">${w}</div>`).join('')}</div><div class="cara">${(q.categories||[]).map(cat=>`<div class="cbkt"><h4>${cat}</h4><div class="cdrp" id="cd-${cat.replace(/\s/g,'_')}" onclick="dropCat('${cat}',event)"></div></div>`).join('')}</div><div class="ar" id="ar">ANSWERS: ${(q.items||[]).map(it=>it.word+'->'+it.cat).join(', ')}</div>${nav(`<button class="btn btn-p btn-sm" onclick="checkCat()">CHECK</button>`)}`;
+  } else if (q.type === 'dictation') {
+    html = `<div class="apa">${q.audioData?`<audio controls src="${q.audioData}"></audio>`:'<p style="color:var(--muted)">No audio.</p>'}</div><div class="qpanel-prompt">${q.prompt||'Listen and write:'}</div><input class="fin" type="text" id="fill-in" placeholder="Transcript..." onkeydown="if(event.key==='Enter')checkDict()"><div class="ar" id="ar">TRANSCRIPT: ${q.answer}</div>${nav(`<button class="btn btn-p btn-sm" onclick="checkDict()">CHECK</button>`)}`;
+  } else if (q.type === 'write-sentence') {
+    html = `${im}<div class="qpanel-prompt">Use: <strong style="color:var(--yel)">"${q.wordPrompt}"</strong></div><textarea style="width:100%;margin-bottom:8px;min-height:60px;font-size:1rem" placeholder="Write your sentence..."></textarea>${q.prompt?`<div class="ar" style="display:block">EXAMPLE: ${q.prompt}</div>`:''}<div class="mbtns"><button class="mbc" onclick="onCorrect()">CORRECT</button><button class="mbw" onclick="onWrong()">WRONG</button></div>`;
+
+  } else if (q.type === 'sentence-context') {
+    html = `${im}<div class="qpanel-prompt" style="color:var(--yel);font-size:1.1rem;border-color:var(--yel)">"${q.sentence}"</div>
+      <p style="color:var(--muted);font-size:.85rem;margin-bottom:10px">Use this sentence naturally in a conversation or explain its meaning in context.</p>
+      ${q.prompt ? `<p style="color:var(--muted);font-size:.85rem;margin-bottom:8px">Hint: ${q.prompt}</p>` : ''}
+      <div class="mbtns"><button class="mbc" onclick="onCorrect()">CORRECT</button><button class="mbw" onclick="onWrong()">WRONG</button></div>`;
+
+  } else if (q.type === 'neanderthal') {
+    html = `${im}<div style="background:rgba(245,216,110,.1);border:2px solid var(--yel);padding:10px 14px;margin-bottom:12px;font-size:1.2rem;color:var(--yel)">${q.ugly}</div>
+      <p style="color:var(--muted);font-size:.85rem;margin-bottom:10px">Transform this into proper English!</p>
+      <input class="fin" type="text" id="fill-in" placeholder="Proper English version..." onkeydown="if(event.key==='Enter')checkNeanderthal()">
+      <div class="ar" id="ar">CORRECT: ${q.correction}</div>
+      ${nav(`<button class="btn btn-p btn-sm" onclick="checkNeanderthal()">CHECK</button>`)}`;
+
+  } else if (q.type === 'spot-difference') {
+    html = `${im}
+      <p style="color:var(--muted);font-size:.82rem;margin-bottom:8px">How are these two sentences different?</p>
+      <div style="background:var(--surf2);border:2px solid var(--border);padding:10px;margin-bottom:8px;font-size:1.05rem;border-left:3px solid var(--pur3)">A: ${q.sentenceA}</div>
+      <div style="background:var(--surf2);border:2px solid var(--border);padding:10px;margin-bottom:12px;font-size:1.05rem;border-left:3px solid var(--pnk2)">B: ${q.sentenceB}</div>
+      <textarea style="width:100%;margin-bottom:8px;min-height:55px;font-size:.95rem" placeholder="Describe the differences..."></textarea>
+      <div class="ar" id="ar" style="white-space:pre-line">DIFFERENCES:\n${q.differences}</div>
+      <div class="mbtns"><button class="mbc" onclick="onCorrect()">CORRECT</button><button class="mbw" onclick="onWrong()">WRONG</button></div>
+      <div class="qactions"><button class="btn btn-g btn-sm" onclick="showAR()">REVEAL</button></div>`;
+
+  } else if (q.type === 'odd-one-out') {
+    const items = q.items || [];
+    html = `${im}<div class="qpanel-prompt">${q.prompt || 'Which one does not belong?'}</div>
+      <div class="chcs">${items.map((it, ii) => `<button class="cbtn" onclick="checkOdd(this,${ii},${q.oddIdx})">${it}</button>`).join('')}</div>
+      <div class="ar" id="ar">ODD ONE OUT: ${items[q.oddIdx]}<br><span style="color:var(--muted);font-size:.85rem">${q.explanation}</span></div>
+      ${nav()}`;
+
+  } else if (q.type === 'repeat-sentence') {
+    html = `${im}<div class="qpanel-prompt">${q.prompt || 'Read carefully — you will need to repeat this!'}</div>
+      <div id="rs-display" style="background:rgba(155,114,207,.12);border:2px solid var(--pur);padding:12px 14px;font-size:1.15rem;text-align:center;margin-bottom:12px;min-height:50px;display:flex;align-items:center;justify-content:center">${q.sentence}</div>
+      <button class="btn btn-p" style="width:100%;justify-content:center;margin-bottom:10px" onclick="startRepeatTimer(${q.delay||3})" id="rs-start-btn">SHOW FOR ${q.delay||3}s THEN HIDE</button>
+      <input class="fin hidden" type="text" id="fill-in" placeholder="Now type the sentence from memory...">
+      <div class="ar" id="ar">SENTENCE: ${q.sentence}</div>
+      ${nav(`<button class="btn btn-p btn-sm hidden" id="rs-check-btn" onclick="checkRepeat()">CHECK</button>`)}`;
+
+  } else if (q.type === 'conjugate') {
+    html = `${im}
+      <div class="qpanel-prompt">Conjugate: <strong style="color:var(--pur3)">${q.verb}</strong></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        <div style="background:var(--surf2);border:2px solid var(--border);padding:6px 12px;font-size:.95rem">Subject: <strong style="color:var(--pnk2)">${q.subject}</strong></div>
+        <div style="background:var(--surf2);border:2px solid var(--border);padding:6px 12px;font-size:.95rem">Tense: <strong style="color:var(--yel)">${q.tense}</strong></div>
+      </div>
+      <input class="fin" type="text" id="fill-in" placeholder="Conjugated form..." onkeydown="if(event.key==='Enter')checkConjugate()">
+      <div class="ar" id="ar">ANSWER: ${q.answer}</div>
+      ${nav(`<button class="btn btn-p btn-sm" onclick="checkConjugate()">CHECK</button>`)}`;
+
+  } else if (q.type === 'spell-word') {
+    const hasSrc = !!q.audioData;
+    html = `${im}
+      <div class="qpanel-prompt">Spell the word you hear:</div>
+      ${hasSrc ? `<audio id="spell-audio" src="${q.audioData}" style="display:none"></audio>` : `<span id="spell-tts-word" style="display:none">${q.word}</span>`}
+      <button class="btn btn-p" style="width:100%;justify-content:center;margin-bottom:12px" onclick="playSpellWord(${hasSrc})">PLAY WORD</button>
+      <input class="fin" type="text" id="fill-in" placeholder="Type the spelling..." onkeydown="if(event.key==='Enter')checkSpell()">
+      <div class="ar" id="ar">SPELLING: ${q.word}</div>
+      ${nav(`<button class="btn btn-p btn-sm" onclick="checkSpell()">CHECK</button>`)}`;
+
+  } else if (q.type === 'rhyme') {
+    const hasSrc = !!q.audioData;
+    const accepted = (q.acceptedRhymes || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+    html = `${im}
+      <div class="qpanel-prompt">Find a word that rhymes with:</div>
+      ${hasSrc ? `<audio id="rhyme-audio" src="${q.audioData}" style="display:none"></audio>` : `<span id="rhyme-tts-word" style="display:none">${q.word}</span>`}
+      <button class="btn btn-k" style="width:100%;justify-content:center;margin-bottom:12px" onclick="playRhymeWord(${hasSrc})">PLAY WORD</button>
+      <input class="fin" type="text" id="fill-in" placeholder="A word that rhymes..." onkeydown="if(event.key==='Enter')checkRhyme()">
+      <div class="ar" id="ar">WORD: ${q.word}<br>RHYMES: ${q.acceptedRhymes}</div>
+      ${nav(`<button class="btn btn-p btn-sm" onclick="checkRhyme()">CHECK</button>`)}`;
+
+  } else if (q.type === 'identify-mistake') {
+    html = `${im}
+      <div class="qpanel-prompt" style="color:var(--red2)">${q.sentence}</div>
+      <p style="color:var(--muted);font-size:.85rem;margin-bottom:10px">What is the mistake? How do you fix it?</p>
+      <input class="fin" type="text" id="fill-in" placeholder="Describe the mistake or type the fix..." onkeydown="if(event.key==='Enter')checkMistake()">
+      <div class="ar" id="ar">MISTAKE: ${q.mistake}<br>CORRECTION: ${q.correction}</div>
+      ${nav(`<button class="btn btn-p btn-sm" onclick="checkMistake()">CHECK</button>`)}`;
+
+  } else if (q.type === 'complete-sentence') {
+    const parts = q.sentence.split('___');
+    html = `${im}
+      <div class="qpanel-prompt">${parts[0]}<span style="background:var(--border);padding:2px 18px;color:var(--muted);font-style:italic">___</span>${parts[1]||''}</div>
+      ${q.prompt ? `<p style="color:var(--muted);font-size:.85rem;margin-bottom:8px">${q.prompt}</p>` : ''}
+      <input class="fin" type="text" id="fill-in" placeholder="Complete the sentence..." onkeydown="if(event.key==='Enter')checkComplete()">
+      <div class="ar" id="ar">ANSWER: ${q.answer}</div>
+      ${nav(`<button class="btn btn-p btn-sm" onclick="checkComplete()">CHECK</button>`)}`;
+  }
+  el.innerHTML = html;
+}
+
+
+
+// ── CHECK FUNCTIONS ───────────────────────────────────────────────────────────
+function showAR(){const a=document.getElementById('ar');if(a)a.style.display='block';}
+function checkMC(btn,c,ans){document.querySelectorAll('.cbtn').forEach(b=>b.disabled=true);if(c===ans){btn.classList.add('correct');onCorrect();}else{btn.classList.add('wrong');document.querySelectorAll('.cbtn')[ans].classList.add('correct');showAR();}}
+function checkTF(btn,c,ans){document.querySelectorAll('.tfbtn').forEach(b=>b.disabled=true);if(c===ans){btn.style.background='var(--pur)';btn.style.color='var(--wht)';onCorrect();}else{btn.style.background='var(--red)';showAR();}}
+function checkFill(){const v=document.getElementById('fill-in').value.trim().toLowerCase();if(v===currentQ().answer.toLowerCase())onCorrect();else showAR();}
+function checkCorrect(){const v=document.getElementById('fill-in').value.trim().toLowerCase();if(v===currentQ().correction.toLowerCase())onCorrect();else showAR();}
+function checkDict(){const v=document.getElementById('fill-in').value.trim().toLowerCase();if(v===currentQ().answer.toLowerCase())onCorrect();else showAR();}
+function placeWord(w,i){window._us.placed.push(w);document.getElementById(`wc-${i}`).classList.add('placed');const d=document.getElementById('sent-drop');const ch=document.createElement('div');ch.className='pchp';ch.textContent=w;ch.onclick=()=>{window._us.placed.splice(window._us.placed.indexOf(w),1);document.getElementById(`wc-${i}`).classList.remove('placed');ch.remove();};d.appendChild(ch);}
+function checkUs(){if(window._us.placed.join(' ')===window._us.target)onCorrect();else showAR();}
+function matchClick(el){const word=el.dataset.word,side=el.dataset.side;if(!window._mt.sel){window._mt.sel=el;window._mt.side=side;el.classList.add('selected');}else{if(window._mt.side===side){window._mt.sel.classList.remove('selected');window._mt.sel=el;window._mt.side=side;el.classList.add('selected');return;}const a=window._mt.sel.dataset.word,b=word,valid=window._mt.pairs.some(p=>(p[0]===a&&p[1]===b)||(p[1]===a&&p[0]===b));if(valid){[window._mt.sel,el].forEach(x=>{x.classList.remove('selected');x.classList.add('matched');x.onclick=null;});window._mt.matched++;if(window._mt.matched===window._mt.total)onCorrect();}else{[window._mt.sel,el].forEach(x=>x.classList.add('wmatch'));setTimeout(()=>[window._mt.sel,el].forEach(x=>x.classList.remove('wmatch','selected')),600);}window._mt.sel=null;}}
+function selCat(w){document.querySelectorAll('.cit').forEach(i=>i.style.borderColor='');window._csi=w;const el=document.getElementById('ci-'+w.replace(/\s/g,'_'));if(el)el.style.borderColor='var(--yel)';}
+function dropCat(cat){if(!window._csi)return;const w=window._csi,src=document.getElementById('ci-'+w.replace(/\s/g,'_'));if(src)src.style.display='none';window._ct.placed[w]=cat;const d=document.getElementById('cd-'+cat.replace(/\s/g,'_'));const ch=document.createElement('div');ch.className='cdrpd';ch.textContent=w;ch.onclick=()=>{if(src)src.style.display='';delete window._ct.placed[w];ch.remove();};d.appendChild(ch);window._csi=null;}
+function checkCat(){let ok=true;(window._ct.correct||[]).forEach(it=>{if(window._ct.placed[it.word]!==it.cat)ok=false;});if(ok&&Object.keys(window._ct.placed).length===(window._ct.correct||[]).length)onCorrect();else showAR();}
+
+
+
+// ── CHECK FUNCTIONS ───────────────────────────────────────────────────────────
+function showAR(){const a=document.getElementById('ar');if(a)a.style.display='block';}
+function checkMC(btn,c,ans){document.querySelectorAll('.cbtn').forEach(b=>b.disabled=true);if(c===ans){btn.classList.add('correct');onCorrect();}else{btn.classList.add('wrong');document.querySelectorAll('.cbtn')[ans].classList.add('correct');showAR();}}
+function checkTF(btn,c,ans){document.querySelectorAll('.tfbtn').forEach(b=>b.disabled=true);if(c===ans){btn.style.background='var(--pur)';btn.style.color='var(--wht)';onCorrect();}else{btn.style.background='var(--red)';showAR();}}
+function checkFill(){const v=document.getElementById('fill-in').value.trim().toLowerCase();if(v===currentQ().answer.toLowerCase())onCorrect();else showAR();}
+function checkCorrect(){const v=document.getElementById('fill-in').value.trim().toLowerCase();if(v===currentQ().correction.toLowerCase())onCorrect();else showAR();}
+function checkDict(){const v=document.getElementById('fill-in').value.trim().toLowerCase();if(v===currentQ().answer.toLowerCase())onCorrect();else showAR();}
+function placeWord(w,i){window._us.placed.push(w);document.getElementById(`wc-${i}`).classList.add('placed');const d=document.getElementById('sent-drop');const ch=document.createElement('div');ch.className='pchp';ch.textContent=w;ch.onclick=()=>{window._us.placed.splice(window._us.placed.indexOf(w),1);document.getElementById(`wc-${i}`).classList.remove('placed');ch.remove();};d.appendChild(ch);}
+function checkUs(){if(window._us.placed.join(' ')===window._us.target)onCorrect();else showAR();}
+function matchClick(el){const word=el.dataset.word,side=el.dataset.side;if(!window._mt.sel){window._mt.sel=el;window._mt.side=side;el.classList.add('selected');}else{if(window._mt.side===side){window._mt.sel.classList.remove('selected');window._mt.sel=el;window._mt.side=side;el.classList.add('selected');return;}const a=window._mt.sel.dataset.word,b=word,valid=window._mt.pairs.some(p=>(p[0]===a&&p[1]===b)||(p[1]===a&&p[0]===b));if(valid){[window._mt.sel,el].forEach(x=>{x.classList.remove('selected');x.classList.add('matched');x.onclick=null;});window._mt.matched++;if(window._mt.matched===window._mt.total)onCorrect();}else{[window._mt.sel,el].forEach(x=>x.classList.add('wmatch'));setTimeout(()=>[window._mt.sel,el].forEach(x=>x.classList.remove('wmatch','selected')),600);}window._mt.sel=null;}}
+function selCat(w){document.querySelectorAll('.cit').forEach(i=>i.style.borderColor='');window._csi=w;const el=document.getElementById('ci-'+w.replace(/\s/g,'_'));if(el)el.style.borderColor='var(--yel)';}
+function dropCat(cat){if(!window._csi)return;const w=window._csi,src=document.getElementById('ci-'+w.replace(/\s/g,'_'));if(src)src.style.display='none';window._ct.placed[w]=cat;const d=document.getElementById('cd-'+cat.replace(/\s/g,'_'));const ch=document.createElement('div');ch.className='cdrpd';ch.textContent=w;ch.onclick=()=>{if(src)src.style.display='';delete window._ct.placed[w];ch.remove();};d.appendChild(ch);window._csi=null;}
+function checkCat(){let ok=true;(window._ct.correct||[]).forEach(it=>{if(window._ct.placed[it.word]!==it.cat)ok=false;});if(ok&&Object.keys(window._ct.placed).length===(window._ct.correct||[]).length)onCorrect();else showAR();}
+
+// ═══════════════════════════════════════════════════════════════════
+
+// ── NEW TYPE CHECK FUNCTIONS ─────────────────────────────────────────────────
+function checkNeanderthal() {
+  const v = document.getElementById('fill-in').value.trim().toLowerCase();
+  const q = game.questions[game.qIdx];
+  if (v === q.correction.toLowerCase()) onCorrect(); else showAR();
+}
+function checkOdd(btn, chosen, correct) {
+  document.querySelectorAll('.cbtn').forEach(b => b.disabled = true);
+  if (chosen === correct) { btn.classList.add('correct'); onCorrect(); }
+  else { btn.classList.add('wrong'); document.querySelectorAll('.cbtn')[correct].classList.add('correct'); showAR(); }
+}
+function startRepeatTimer(delay) {
+  const btn = document.getElementById('rs-start-btn');
+  const display = document.getElementById('rs-display');
+  const inp = document.getElementById('fill-in');
+  const checkBtn = document.getElementById('rs-check-btn');
+  if (btn) btn.style.display = 'none';
+  let t = delay;
+  display.style.borderColor = 'var(--yel)';
+  const interval = setInterval(() => {
+    t--;
+    if (t <= 0) {
+      clearInterval(interval);
+      display.textContent = '???';
+      display.style.borderColor = 'var(--border)';
+      display.style.color = 'var(--muted)';
+      if (inp) inp.classList.remove('hidden');
+      if (checkBtn) checkBtn.classList.remove('hidden');
+    } else {
+      display.style.borderColor = `hsl(${t/delay*120},70%,55%)`;
+    }
+  }, 1000);
+}
+function checkRepeat() {
+  const v = document.getElementById('fill-in').value.trim().toLowerCase();
+  const q = game.questions[game.qIdx];
+  if (v === q.sentence.toLowerCase()) onCorrect(); else showAR();
+}
+function checkConjugate() {
+  const v = document.getElementById('fill-in').value.trim().toLowerCase();
+  const q = game.questions[game.qIdx];
+  // accept any answer in comma-separated answer field
+  const answers = q.answer.split(',').map(a => a.trim().toLowerCase());
+  if (answers.includes(v)) onCorrect(); else showAR();
+}
+function playSpellWord(hasSrc) {
+  if (hasSrc) {
+    const a = document.getElementById('spell-audio');
+    if (a) { a.currentTime = 0; a.play(); }
+  } else {
+    const word = document.getElementById('spell-tts-word')?.textContent;
+    if (word && 'speechSynthesis' in window) {
+      const utt = new SpeechSynthesisUtterance(word);
+      utt.rate = 0.8; utt.lang = 'en-US';
+      speechSynthesis.speak(utt);
+    }
+  }
+}
+function checkSpell() {
+  const v = document.getElementById('fill-in').value.trim().toLowerCase();
+  const q = game.questions[game.qIdx];
+  if (v === q.word.toLowerCase()) onCorrect(); else showAR();
+}
+function playRhymeWord(hasSrc) {
+  if (hasSrc) {
+    const a = document.getElementById('rhyme-audio');
+    if (a) { a.currentTime = 0; a.play(); }
+  } else {
+    const word = document.getElementById('rhyme-tts-word')?.textContent;
+    if (word && 'speechSynthesis' in window) {
+      const utt = new SpeechSynthesisUtterance(word);
+      utt.rate = 0.85; utt.lang = 'en-US';
+      speechSynthesis.speak(utt);
+    }
+  }
+}
+function checkRhyme() {
+  const v = document.getElementById('fill-in').value.trim().toLowerCase();
+  const q = game.questions[game.qIdx];
+  const accepted = (q.acceptedRhymes || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+  if (accepted.includes(v)) onCorrect(); else showAR();
+}
+function checkMistake() {
+  // liberal check: if student typed the correction or described the mistake word
+  const v = document.getElementById('fill-in').value.trim().toLowerCase();
+  const q = game.questions[game.qIdx];
+  const targets = [q.correction, q.mistake].map(s => s.toLowerCase());
+  if (targets.some(t => v.includes(t.split(' ')[0]))) onCorrect(); else showAR();
+}
+function checkComplete() {
+  const v = document.getElementById('fill-in').value.trim().toLowerCase();
+  const q = game.questions[game.qIdx];
+  const accepted = (q.answer || '').split('/').map(s => s.trim().toLowerCase()).filter(Boolean);
+  if (accepted.some(a => v.includes(a) || a.includes(v))) onCorrect(); else showAR();
+}
+
+
+// ═══════════════════════════════════════════════════════════════════
+//  DUCK STORE
+// ═══════════════════════════════════════════════════════════════════
+const DUCKS = [
+  {id:'mallard',  name:'MALLARD',      cost:10,  pal:['#3a7a28','#1a5020','#e09020','#c8c040']},
+  {id:'rubber',   name:'RUBBER DUCK',  cost:15,  pal:['#f5d86e','#dab820','#e07010','#f5f090']},
+  {id:'mandarin', name:'MANDARIN',     cost:25,  pal:['#c84010','#f07020','#f0c040','#2a5a8a']},
+  {id:'teal',     name:'TEAL DUCK',    cost:30,  pal:['#18807a','#0e4a4a','#c47a10','#40c0b0']},
+  {id:'wood',     name:'WOOD DUCK',    cost:40,  pal:['#5a3010','#3a1e0a','#f0c040','#c84010']},
+  {id:'ninja',    name:'NINJA DUCK',   cost:50,  pal:['#1a1a1a','#080808','#303030','#606060']},
+  {id:'golden',   name:'GOLDEN DUCK',  cost:80,  pal:['#f5d86e','#c8a020','#e09020','#fffff0']},
+  {id:'disco',    name:'DISCO DUCK',   cost:100, pal:['#c060c0','#8030a0','#f0c040','#40c0f0']},
+];
+
+function drawDuck(canvas, duck, size) {
+  canvas.width = size; canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  const s = size / 56;
+  const [body, head, beak, acc] = duck.pal;
+  ctx.clearRect(0,0,size,size);
+  // water
+  ctx.fillStyle='#0a2a3a'; ctx.fillRect(0,Math.round(38*s),size,Math.round(18*s));
+  ctx.fillStyle='#0e4060'; ctx.fillRect(0,Math.round(38*s),size,Math.round(3*s));
+  // body
+  ctx.fillStyle=body; ctx.beginPath(); ctx.ellipse(28*s,36*s,18*s,10*s,0,0,Math.PI*2); ctx.fill();
+  // wing shine
+  ctx.fillStyle=acc; ctx.globalAlpha=.35;
+  ctx.beginPath(); ctx.ellipse(28*s,33*s,10*s,5*s,-0.2,0,Math.PI*2); ctx.fill();
+  ctx.globalAlpha=1;
+  // tail
+  ctx.fillStyle=body; ctx.beginPath(); ctx.moveTo(44*s,32*s); ctx.lineTo(50*s,26*s); ctx.lineTo(46*s,36*s); ctx.fill();
+  // neck
+  ctx.fillStyle=head; ctx.beginPath(); ctx.ellipse(18*s,28*s,6*s,9*s,0,0,Math.PI*2); ctx.fill();
+  // head
+  ctx.fillStyle=head; ctx.beginPath(); ctx.arc(16*s,20*s,9*s,0,Math.PI*2); ctx.fill();
+  // iridescent neck ring (mallard / teal)
+  if (duck.id==='mallard'||duck.id==='teal') {
+    ctx.strokeStyle='#a0f0d0'; ctx.lineWidth=1.5*s; ctx.globalAlpha=.5;
+    ctx.beginPath(); ctx.ellipse(18*s,25*s,5*s,3*s,0,0,Math.PI*2); ctx.stroke();
+    ctx.globalAlpha=1;
+  }
+  // eye white
+  ctx.fillStyle='#f0ead8'; ctx.beginPath(); ctx.arc(12*s,18*s,2.8*s,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#0a0a0a'; ctx.beginPath(); ctx.arc(11*s,18*s,1.4*s,0,Math.PI*2); ctx.fill();
+  // beak
+  ctx.fillStyle=beak; ctx.beginPath();
+  ctx.moveTo(6*s,20*s); ctx.lineTo(1*s,22*s); ctx.lineTo(6*s,24*s); ctx.lineTo(10*s,22*s); ctx.fill();
+  ctx.strokeStyle='#00000055'; ctx.lineWidth=.8*s;
+  ctx.beginPath(); ctx.moveTo(6*s,22*s); ctx.lineTo(10*s,22*s); ctx.stroke();
+  // extras
+  if (duck.id==='golden') {
+    ctx.fillStyle='#fffff0'; ctx.globalAlpha=.5;
+    for(let i=0;i<5;i++){ctx.beginPath();ctx.arc((6+i*9)*s,(5+Math.sin(i)*3)*s,1.5*s,0,Math.PI*2);ctx.fill();}
+    ctx.globalAlpha=1;
+  }
+  if (duck.id==='disco') {
+    const rc=['#ff4040','#40ff40','#4040ff','#ffff40','#ff40ff'];
+    rc.forEach((c,i)=>{ctx.fillStyle=c;ctx.globalAlpha=.7;ctx.fillRect((3+i*9)*s,3*s,6*s,6*s);});
+    ctx.globalAlpha=1;
+  }
+  if (duck.id==='ninja') {
+    ctx.fillStyle='#101010'; ctx.globalAlpha=.85;
+    ctx.fillRect(7*s,14*s,18*s,7*s); ctx.globalAlpha=1;
+    ctx.fillStyle='#ff3030';
+    ctx.beginPath(); ctx.arc(11*s,18*s,1.5*s,0,Math.PI*2); ctx.fill();
+  }
+}
+
+function drawCoin() {
+  const c = document.getElementById('coin-cvs');
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0,0,26,26);
+  ctx.fillStyle='#c47a10'; ctx.beginPath(); ctx.arc(13,13,11,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#f5b030'; ctx.beginPath(); ctx.arc(13,13,8,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#7a4010'; ctx.font='bold 11px monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('$',13,14);
+}
+
+function openStore() {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-store').classList.add('active');
+  renderStore();
+}
+
+function renderStore() {
+  document.getElementById('store-coin-lbl').textContent = quiz.coins + ' coins remaining';
+  const grid = document.getElementById('duck-grid'); grid.innerHTML='';
+  DUCKS.forEach(duck => {
+    const owned = quiz.owned.includes(duck.id);
+    const pricey = !owned && duck.cost > quiz.coins;
+    const card = document.createElement('div');
+    card.className = 'duck-card' + (owned?' owned':'') + (pricey?' pricey':'');
+    const cvs = document.createElement('canvas');
+    cvs.className='duck-cvs'; card.appendChild(cvs);
+    drawDuck(cvs, duck, 56);
+    card.innerHTML += `<div class="duck-name">${duck.name}</div><div class="duck-cost">${duck.cost} coins</div>`;
+    if (owned) card.innerHTML += `<div class="duck-badge">OWNED</div>`;
+    if (!owned && !pricey) card.onclick = () => buyDuck(duck);
+    grid.appendChild(card);
+  });
+  renderPond();
+}
+
+function buyDuck(duck) {
+  if (quiz.coins < duck.cost || quiz.owned.includes(duck.id)) return;
+  quiz.coins -= duck.cost;
+  quiz.owned.push(duck.id);
+  notify('YOU GOT A ' + duck.name + '!');
+  renderStore();
+}
+
+function renderPond() {
+  const pond = document.getElementById('pond'); pond.innerHTML='';
+  if (!quiz.owned.length) {
+    pond.innerHTML='<span class="pond-empty">Buy ducks to fill your pond!</span>'; return;
+  }
+  quiz.owned.forEach(id => {
+    const duck = DUCKS.find(d=>d.id===id);
+    if (!duck) return;
+    const c = document.createElement('canvas');
+    c.style.imageRendering='pixelated'; c.title=duck.name;
+    drawDuck(c, duck, 72); pond.appendChild(c);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  AI GENERATE
+// ═══════════════════════════════════════════════════════════════════
+
+
+
+// ═══════════════════════════════════════════════════════════════════
+//  VOCAB BANK
+// ═══════════════════════════════════════════════════════════════════
+let vocabBank = JSON.parse(localStorage.getItem('hq_vocab') || '[]');
+// Each card: { word, definition, translation, image, audioData, tags }
+
+function saveVocab() { localStorage.setItem('hq_vocab', JSON.stringify(vocabBank)); }
+
+function initVocabTab() {
+  renderVocabList();
+  document.getElementById('vb-count').textContent = vocabBank.length + ' words';
+}
+
+function renderVocabList() {
+  const el = document.getElementById('vocab-list'); el.innerHTML = '';
+  document.getElementById('vb-count').textContent = vocabBank.length + ' words';
+  if (!vocabBank.length) {
+    el.innerHTML = '<p style="color:var(--muted);font-size:.9rem;padding:10px">No vocab cards yet. Add words above or import a CSV.</p>';
+    return;
+  }
+  vocabBank.forEach((card, i) => {
+    const row = document.createElement('div'); row.className = 'vcard';
+    row.innerHTML = `
+      <div class="vcard-img-wrap">
+        ${card.image ? `<img src="${card.image}" class="vcard-img">` : `<div class="vcard-no-img">IMG</div>`}
+        <label class="vcard-img-btn" title="Upload image">
+          <input type="file" accept="image/*" onchange="uploadVocabImg(event,${i})">+
+        </label>
+      </div>
+      <div class="vcard-body">
+        <input type="text" class="vcard-word" value="${esc(card.word)}" placeholder="Word..." oninput="vocabBank[${i}].word=this.value;saveVocab()">
+        <input type="text" class="vcard-def" value="${esc(card.definition)}" placeholder="Definition..." oninput="vocabBank[${i}].definition=this.value;saveVocab()">
+        <input type="text" class="vcard-def" value="${esc(card.translation||'')}" placeholder="Translation (optional)..." oninput="vocabBank[${i}].translation=this.value;saveVocab()">
+        <input type="text" class="vcard-def" value="${esc(card.tags||'')}" placeholder="Tags (e.g. food, B1)..." oninput="vocabBank[${i}].tags=this.value;saveVocab()">
+      </div>
+      <button class="btn btn-r btn-sm" style="align-self:flex-start" onclick="deleteVocabCard(${i})">DEL</button>`;
+    el.appendChild(row);
+  });
+}
+
+function addVocabCard() {
+  vocabBank.push({ word:'', definition:'', translation:'', image:null, tags:'' });
+  saveVocab(); renderVocabList();
+  // scroll to bottom
+  setTimeout(() => {
+    const el = document.getElementById('vocab-list');
+    el.lastElementChild?.scrollIntoView({ behavior:'smooth' });
+  }, 50);
+}
+
+function deleteVocabCard(i) {
+  vocabBank.splice(i,1); saveVocab(); renderVocabList();
+}
+
+function uploadVocabImg(event, i) {
+  const f = event.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = e => { vocabBank[i].image = e.target.result; saveVocab(); renderVocabList(); };
+  r.readAsDataURL(f);
+}
+
+function importVocabCSV(event) {
+  const f = event.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = e => {
+    const lines = e.target.result.split('\n').filter(l => l.trim());
+    let added = 0;
+    lines.forEach(line => {
+      // Support: word,definition OR word,definition,translation OR word,definition,translation,tags
+      const cols = line.split(',').map(c => c.trim().replace(/^"|"$/g,''));
+      if (cols[0]) {
+        vocabBank.push({ word:cols[0]||'', definition:cols[1]||'', translation:cols[2]||'', tags:cols[3]||'', image:null });
+        added++;
+      }
+    });
+    saveVocab(); renderVocabList();
+    notify(added + ' WORDS IMPORTED!');
+  };
+  r.readAsText(f);
+}
+
+function clearVocabBank() {
+  if (!confirm('Delete all vocab cards?')) return;
+  vocabBank = []; saveVocab(); renderVocabList();
+}
+
+// ── VOCAB QUIZ GENERATION ─────────────────────────────────────────
+// Question types suitable for vocab: mc, fill-blank, spell-word, odd-one-out,
+// true-false, match-opposites, categorise, dictation
+
+const VOCAB_Q_TYPES = ['mc-def','mc-image','fill-blank','spell','odd-one-out','true-false','match','dictation'];
+
+function buildVocabQuizURL() {
+  if (vocabBank.length < 4) { notify('ADD AT LEAST 4 WORDS FIRST'); return; }
+  const coins = parseInt(document.getElementById('vb-coins').value) || 10;
+  const count = parseInt(document.getElementById('vb-q-count').value) || 20;
+  const selectedTypes = [...document.querySelectorAll('.vb-type-cb:checked')].map(cb => cb.value);
+  if (!selectedTypes.length) { notify('SELECT AT LEAST ONE QUESTION TYPE'); return; }
+
+  // Generate questions now and encode them
+  const questions = generateVocabQuestions(vocabBank, count, selectedTypes);
+  const payload = JSON.stringify({ name: 'Vocab Quiz', coins, questions, vocabMode: true });
+  const b64 = btoa(unescape(encodeURIComponent(payload)));
+  const base = window.location.href.split('?')[0].split('#')[0];
+  return base + '?quiz=' + encodeURIComponent(b64);
+}
+
+function generateVocabQuestions(bank, count, types) {
+  const qs = [];
+  const shuffled = shuffle([...bank]);
+  for (let i = 0; i < count; i++) {
+    const card = shuffled[i % shuffled.length];
+    const type = types[Math.floor(Math.random() * types.length)];
+    const q = makeVocabQuestion(card, bank, type);
+    if (q) qs.push(q);
+  }
+  return qs;
+}
+
+function getDistractors(card, bank, n) {
+  // Get n other cards (different word)
+  return shuffle(bank.filter(c => c.word !== card.word)).slice(0, n);
+}
+
+function makeVocabQuestion(card, bank, type) {
+  const distractors = getDistractors(card, bank, 3);
+  if (distractors.length < 3 && ['mc-def','mc-image','odd-one-out','match'].includes(type)) {
+    type = 'fill-blank'; // fallback if not enough cards
+  }
+
+  if (type === 'mc-def') {
+    // "What does X mean?" — 4 definitions
+    const wrong = distractors.map(d => d.definition).filter(Boolean);
+    if (wrong.length < 3) return makeVocabQuestion(card, bank, 'fill-blank');
+    const choices = shuffle([card.definition, ...wrong.slice(0,3)]);
+    return {
+      type: 'multiple-choice',
+      prompt: 'What does "' + card.word + '" mean?',
+      image: card.image || null,
+      choices,
+      answer: choices.indexOf(card.definition)
+    };
+  }
+
+  if (type === 'mc-image') {
+    // Show image, pick correct word — only if card has image
+    const hasImages = bank.filter(c => c.image && c.word !== card.word);
+    if (!card.image || hasImages.length < 3) return makeVocabQuestion(card, bank, 'mc-def');
+    const wrongWords = shuffle(hasImages).slice(0,3).map(c => c.word);
+    const choices = shuffle([card.word, ...wrongWords]);
+    return {
+      type: 'multiple-choice',
+      prompt: 'What word does this image show?',
+      image: card.image,
+      choices,
+      answer: choices.indexOf(card.word)
+    };
+  }
+
+  if (type === 'fill-blank') {
+    return {
+      type: 'fill-blank',
+      prompt: (card.definition || card.translation || 'Definition: ' + card.word) + ' = ___',
+      image: card.image || null,
+      answer: card.word
+    };
+  }
+
+  if (type === 'spell') {
+    return {
+      type: 'spell-word',
+      prompt: card.definition ? 'Hear and spell: "' + card.definition + '"' : 'Spell the word:',
+      image: card.image || null,
+      word: card.word,
+      audioData: card.audioData || null
+    };
+  }
+
+  if (type === 'odd-one-out') {
+    // 4 cards same tags/category + 1 from different
+    const sameTag = bank.filter(c => c.word !== card.word && c.tags && c.tags === card.tags);
+    const diffTag = bank.filter(c => c.word !== card.word && (!c.tags || c.tags !== card.tags));
+    if (sameTag.length < 2 || !diffTag.length) return makeVocabQuestion(card, bank, 'mc-def');
+    const peers = shuffle(sameTag).slice(0,2);
+    const odd = shuffle(diffTag)[0];
+    const items = shuffle([card.word, ...peers.map(c=>c.word), odd.word]);
+    return {
+      type: 'odd-one-out',
+      prompt: 'Which word does NOT belong?',
+      image: null,
+      items,
+      oddIdx: items.indexOf(odd.word),
+      explanation: odd.tags ? '"' + odd.word + '" belongs to: ' + odd.tags : '"' + odd.word + '" is different'
+    };
+  }
+
+  if (type === 'true-false') {
+    // "This word means [definition]" — true or false (sometimes lie)
+    const lie = Math.random() > 0.5;
+    const wrongDef = lie ? (distractors[0]?.definition || 'something else') : card.definition;
+    const isTrue = !lie;
+    return {
+      type: 'true-false',
+      prompt: '"' + card.word + '" means: ' + wrongDef,
+      image: card.image || null,
+      answer: isTrue ? 'true' : 'false'
+    };
+  }
+
+  if (type === 'match') {
+    // Build a mini match set: 3–4 word↔definition pairs
+    const pool = shuffle([card, ...distractors]).slice(0,4);
+    const pairs = pool.map(c => [c.word, c.definition || c.translation || c.word]);
+    return {
+      type: 'match-opposites',
+      prompt: 'Match each word to its meaning:',
+      image: null,
+      pairs
+    };
+  }
+
+  if (type === 'dictation') {
+    return {
+      type: 'dictation',
+      prompt: 'Listen and write the word:',
+      image: card.image || null,
+      answer: card.word,
+      audioData: card.audioData || null
+    };
+  }
+
+  return null;
+}
+
+function previewVocabQuiz() {
+  const url = buildVocabQuizURL();
+  if (url) window.open(url, '_blank');
+}
+
+function buildVocabQR() {
+  const url = buildVocabQuizURL();
+  if (!url) return;
+  const out = document.getElementById('vb-qr-out'); out.innerHTML='';
+  try {
+    new QRCode(out, {
+      text: url, width:200, height:200,
+      colorDark:'#0c1a0e', colorLight:'#ffffff',
+      correctLevel: QRCode.CorrectLevel.L
+    });
+  } catch(e) {
+    out.innerHTML = '<p style="color:var(--muted);padding:10px">QR too large — use the link below.</p>';
+  }
+  const disp = document.getElementById('vb-qr-url');
+  disp.textContent = url.length > 100 ? url.slice(0,100)+'...' : url;
+  disp.dataset.full = url;
+  document.getElementById('vb-qr-area').classList.remove('hidden');
+}
+
+function copyVocabLink() {
+  const url = document.getElementById('vb-qr-url').dataset.full || '';
+  navigator.clipboard.writeText(url).then(()=>notify('LINK COPIED!')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=url;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();notify('LINK COPIED!');
+  });
+}
+
+
+
+// ═══════════════════════════════════════════════════════════════════
+//  DUCK STORE
+// ═══════════════════════════════════════════════════════════════════
+const DUCKS = [
+  {id:'mallard',  name:'MALLARD',      cost:10,  pal:['#3a7a28','#1a5020','#e09020','#c8c040']},
+  {id:'rubber',   name:'RUBBER DUCK',  cost:15,  pal:['#f5d86e','#dab820','#e07010','#f5f090']},
+  {id:'mandarin', name:'MANDARIN',     cost:25,  pal:['#c84010','#f07020','#f0c040','#2a5a8a']},
+  {id:'teal',     name:'TEAL DUCK',    cost:30,  pal:['#18807a','#0e4a4a','#c47a10','#40c0b0']},
+  {id:'wood',     name:'WOOD DUCK',    cost:40,  pal:['#5a3010','#3a1e0a','#f0c040','#c84010']},
+  {id:'ninja',    name:'NINJA DUCK',   cost:50,  pal:['#1a1a1a','#080808','#303030','#606060']},
+  {id:'golden',   name:'GOLDEN DUCK',  cost:80,  pal:['#f5d86e','#c8a020','#e09020','#fffff0']},
+  {id:'disco',    name:'DISCO DUCK',   cost:100, pal:['#c060c0','#8030a0','#f0c040','#40c0f0']},
+];
+
+function drawDuck(canvas, duck, size) {
+  canvas.width=size; canvas.height=size;
+  const ctx=canvas.getContext('2d'), s=size/56;
+  const [body,head,beak,acc]=duck.pal;
+  ctx.clearRect(0,0,size,size);
+  ctx.fillStyle='#0a2a3a'; ctx.fillRect(0,Math.round(38*s),size,Math.round(18*s));
+  ctx.fillStyle='#0e4060'; ctx.fillRect(0,Math.round(38*s),size,Math.round(3*s));
+  ctx.fillStyle=body; ctx.beginPath(); ctx.ellipse(28*s,36*s,18*s,10*s,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle=acc; ctx.globalAlpha=.35;
+  ctx.beginPath(); ctx.ellipse(28*s,33*s,10*s,5*s,-0.2,0,Math.PI*2); ctx.fill();
+  ctx.globalAlpha=1;
+  ctx.fillStyle=body; ctx.beginPath(); ctx.moveTo(44*s,32*s); ctx.lineTo(50*s,26*s); ctx.lineTo(46*s,36*s); ctx.fill();
+  ctx.fillStyle=head; ctx.beginPath(); ctx.ellipse(18*s,28*s,6*s,9*s,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle=head; ctx.beginPath(); ctx.arc(16*s,20*s,9*s,0,Math.PI*2); ctx.fill();
+  if (duck.id==='mallard'||duck.id==='teal') {
+    ctx.strokeStyle='#a0f0d0'; ctx.lineWidth=1.5*s; ctx.globalAlpha=.5;
+    ctx.beginPath(); ctx.ellipse(18*s,25*s,5*s,3*s,0,0,Math.PI*2); ctx.stroke(); ctx.globalAlpha=1;
+  }
+  ctx.fillStyle='#f0ead8'; ctx.beginPath(); ctx.arc(12*s,18*s,2.8*s,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#0a0a0a'; ctx.beginPath(); ctx.arc(11*s,18*s,1.4*s,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle=beak; ctx.beginPath();
+  ctx.moveTo(6*s,20*s); ctx.lineTo(1*s,22*s); ctx.lineTo(6*s,24*s); ctx.lineTo(10*s,22*s); ctx.fill();
+  if (duck.id==='golden') { ctx.fillStyle='#fffff0'; ctx.globalAlpha=.5; for(let i=0;i<5;i++){ctx.beginPath();ctx.arc((6+i*9)*s,(5+Math.sin(i)*3)*s,1.5*s,0,Math.PI*2);ctx.fill();} ctx.globalAlpha=1; }
+  if (duck.id==='disco') { const rc=['#ff4040','#40ff40','#4040ff','#ffff40','#ff40ff']; rc.forEach((c,i)=>{ctx.fillStyle=c;ctx.globalAlpha=.7;ctx.fillRect((3+i*9)*s,3*s,6*s,6*s);}); ctx.globalAlpha=1; }
+  if (duck.id==='ninja') { ctx.fillStyle='#101010'; ctx.globalAlpha=.85; ctx.fillRect(7*s,14*s,18*s,7*s); ctx.globalAlpha=1; ctx.fillStyle='#ff3030'; ctx.beginPath(); ctx.arc(11*s,18*s,1.5*s,0,Math.PI*2); ctx.fill(); }
+}
+
+function drawCoin() {
+  const c=document.getElementById('coin-cvs'); if(!c) return;
+  const ctx=c.getContext('2d'); ctx.clearRect(0,0,26,26);
+  ctx.fillStyle='#c47a10'; ctx.beginPath(); ctx.arc(13,13,11,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#f5b030'; ctx.beginPath(); ctx.arc(13,13,8,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#7a4010'; ctx.font='bold 11px monospace'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('$',13,14);
+}
+
+function openStore() {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-store').classList.add('active');
+  renderStore();
+}
+function renderStore() {
+  document.getElementById('store-coin-lbl').textContent=quiz.coins+' coins remaining';
+  const grid=document.getElementById('duck-grid'); grid.innerHTML='';
+  DUCKS.forEach(duck=>{
+    const owned=quiz.owned.includes(duck.id), pricey=!owned&&duck.cost>quiz.coins;
+    const card=document.createElement('div'); card.className='duck-card'+(owned?' owned':'')+(pricey?' pricey':'');
+    const cvs=document.createElement('canvas'); cvs.className='duck-cvs'; card.appendChild(cvs); drawDuck(cvs,duck,56);
+    card.innerHTML+=`<div class="duck-name">${duck.name}</div><div class="duck-cost">${duck.cost} coins</div>`;
+    if(owned) card.innerHTML+=`<div class="duck-badge">OWNED</div>`;
+    if(!owned&&!pricey) card.onclick=()=>buyDuck(duck);
+    grid.appendChild(card);
+  });
+  renderPond();
+}
+function buyDuck(duck) {
+  if(quiz.coins<duck.cost||quiz.owned.includes(duck.id)) return;
+  quiz.coins-=duck.cost; quiz.owned.push(duck.id); notify('YOU GOT A '+duck.name+'!'); renderStore();
+}
+function renderPond() {
+  const pond=document.getElementById('pond'); pond.innerHTML='';
+  if(!quiz.owned.length){pond.innerHTML='<span class="pond-empty">Buy ducks to fill your pond!</span>';return;}
+  quiz.owned.forEach(id=>{
+    const duck=DUCKS.find(d=>d.id===id); if(!duck) return;
+    const c=document.createElement('canvas'); c.style.imageRendering='pixelated'; c.title=duck.name;
+    drawDuck(c,duck,72); pond.appendChild(c);
+  });
+}
+
+
+
+// ── VOCAB BANK ───────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════
+//  AI GENERATE
+// ═══════════════════════════════════════════════════════════════════
+
+
+
+// ═══════════════════════════════════════════════════════════════════
+//  VOCAB BANK
+// ═══════════════════════════════════════════════════════════════════
+let vocabBank = JSON.parse(localStorage.getItem('hq_vocab') || '[]');
+// Each card: { word, definition, translation, image, audioData, tags }
+
+function saveVocab() { localStorage.setItem('hq_vocab', JSON.stringify(vocabBank)); }
+
+function initVocabTab() {
+  renderVocabList();
+  document.getElementById('vb-count').textContent = vocabBank.length + ' words';
+}
+
+function renderVocabList() {
+  const el = document.getElementById('vocab-list'); el.innerHTML = '';
+  document.getElementById('vb-count').textContent = vocabBank.length + ' words';
+  if (!vocabBank.length) {
+    el.innerHTML = '<p style="color:var(--muted);font-size:.9rem;padding:10px">No vocab cards yet. Add words above or import a CSV.</p>';
+    return;
+  }
+  vocabBank.forEach((card, i) => {
+    const row = document.createElement('div'); row.className = 'vcard';
+    row.innerHTML = `
+      <div class="vcard-img-wrap">
+        ${card.image ? `<img src="${card.image}" class="vcard-img">` : `<div class="vcard-no-img">IMG</div>`}
+        <label class="vcard-img-btn" title="Upload image">
+          <input type="file" accept="image/*" onchange="uploadVocabImg(event,${i})">+
+        </label>
+      </div>
+      <div class="vcard-body">
+        <input type="text" class="vcard-word" value="${esc(card.word)}" placeholder="Word..." oninput="vocabBank[${i}].word=this.value;saveVocab()">
+        <input type="text" class="vcard-def" value="${esc(card.definition)}" placeholder="Definition..." oninput="vocabBank[${i}].definition=this.value;saveVocab()">
+        <input type="text" class="vcard-def" value="${esc(card.translation||'')}" placeholder="Translation (optional)..." oninput="vocabBank[${i}].translation=this.value;saveVocab()">
+        <input type="text" class="vcard-def" value="${esc(card.tags||'')}" placeholder="Tags (e.g. food, B1)..." oninput="vocabBank[${i}].tags=this.value;saveVocab()">
+      </div>
+      <button class="btn btn-r btn-sm" style="align-self:flex-start" onclick="deleteVocabCard(${i})">DEL</button>`;
+    el.appendChild(row);
+  });
+}
+
+function addVocabCard() {
+  vocabBank.push({ word:'', definition:'', translation:'', image:null, tags:'' });
+  saveVocab(); renderVocabList();
+  // scroll to bottom
+  setTimeout(() => {
+    const el = document.getElementById('vocab-list');
+    el.lastElementChild?.scrollIntoView({ behavior:'smooth' });
+  }, 50);
+}
+
+function deleteVocabCard(i) {
+  vocabBank.splice(i,1); saveVocab(); renderVocabList();
+}
+
+function uploadVocabImg(event, i) {
+  const f = event.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = e => { vocabBank[i].image = e.target.result; saveVocab(); renderVocabList(); };
+  r.readAsDataURL(f);
+}
+
+function importVocabCSV(event) {
+  const f = event.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = e => {
+    const lines = e.target.result.split('\n').filter(l => l.trim());
+    let added = 0;
+    lines.forEach(line => {
+      // Support: word,definition OR word,definition,translation OR word,definition,translation,tags
+      const cols = line.split(',').map(c => c.trim().replace(/^"|"$/g,''));
+      if (cols[0]) {
+        vocabBank.push({ word:cols[0]||'', definition:cols[1]||'', translation:cols[2]||'', tags:cols[3]||'', image:null });
+        added++;
+      }
+    });
+    saveVocab(); renderVocabList();
+    notify(added + ' WORDS IMPORTED!');
+  };
+  r.readAsText(f);
+}
+
+function clearVocabBank() {
+  if (!confirm('Delete all vocab cards?')) return;
+  vocabBank = []; saveVocab(); renderVocabList();
+}
+
+// ── VOCAB QUIZ GENERATION ─────────────────────────────────────────
+// Question types suitable for vocab: mc, fill-blank, spell-word, odd-one-out,
+// true-false, match-opposites, categorise, dictation
+
+const VOCAB_Q_TYPES = ['mc-def','mc-image','fill-blank','spell','odd-one-out','true-false','match','dictation'];
+
+function buildVocabQuizURL() {
+  if (vocabBank.length < 4) { notify('ADD AT LEAST 4 WORDS FIRST'); return; }
+  const coins = parseInt(document.getElementById('vb-coins').value) || 10;
+  const count = parseInt(document.getElementById('vb-q-count').value) || 20;
+  const selectedTypes = [...document.querySelectorAll('.vb-type-cb:checked')].map(cb => cb.value);
+  if (!selectedTypes.length) { notify('SELECT AT LEAST ONE QUESTION TYPE'); return; }
+
+  // Generate questions now and encode them
+  const questions = generateVocabQuestions(vocabBank, count, selectedTypes);
+  const payload = JSON.stringify({ name: 'Vocab Quiz', coins, questions, vocabMode: true });
+  const b64 = btoa(unescape(encodeURIComponent(payload)));
+  const base = window.location.href.split('?')[0].split('#')[0];
+  return base + '?quiz=' + encodeURIComponent(b64);
+}
+
+function generateVocabQuestions(bank, count, types) {
+  const qs = [];
+  const shuffled = shuffle([...bank]);
+  for (let i = 0; i < count; i++) {
+    const card = shuffled[i % shuffled.length];
+    const type = types[Math.floor(Math.random() * types.length)];
+    const q = makeVocabQuestion(card, bank, type);
+    if (q) qs.push(q);
+  }
+  return qs;
+}
+
+function getDistractors(card, bank, n) {
+  // Get n other cards (different word)
+  return shuffle(bank.filter(c => c.word !== card.word)).slice(0, n);
+}
+
+function makeVocabQuestion(card, bank, type) {
+  const distractors = getDistractors(card, bank, 3);
+  if (distractors.length < 3 && ['mc-def','mc-image','odd-one-out','match'].includes(type)) {
+    type = 'fill-blank'; // fallback if not enough cards
+  }
+
+  if (type === 'mc-def') {
+    // "What does X mean?" — 4 definitions
+    const wrong = distractors.map(d => d.definition).filter(Boolean);
+    if (wrong.length < 3) return makeVocabQuestion(card, bank, 'fill-blank');
+    const choices = shuffle([card.definition, ...wrong.slice(0,3)]);
+    return {
+      type: 'multiple-choice',
+      prompt: 'What does "' + card.word + '" mean?',
+      image: card.image || null,
+      choices,
+      answer: choices.indexOf(card.definition)
+    };
+  }
+
+  if (type === 'mc-image') {
+    // Show image, pick correct word — only if card has image
+    const hasImages = bank.filter(c => c.image && c.word !== card.word);
+    if (!card.image || hasImages.length < 3) return makeVocabQuestion(card, bank, 'mc-def');
+    const wrongWords = shuffle(hasImages).slice(0,3).map(c => c.word);
+    const choices = shuffle([card.word, ...wrongWords]);
+    return {
+      type: 'multiple-choice',
+      prompt: 'What word does this image show?',
+      image: card.image,
+      choices,
+      answer: choices.indexOf(card.word)
+    };
+  }
+
+  if (type === 'fill-blank') {
+    return {
+      type: 'fill-blank',
+      prompt: (card.definition || card.translation || 'Definition: ' + card.word) + ' = ___',
+      image: card.image || null,
+      answer: card.word
+    };
+  }
+
+  if (type === 'spell') {
+    return {
+      type: 'spell-word',
+      prompt: card.definition ? 'Hear and spell: "' + card.definition + '"' : 'Spell the word:',
+      image: card.image || null,
+      word: card.word,
+      audioData: card.audioData || null
+    };
+  }
+
+  if (type === 'odd-one-out') {
+    // 4 cards same tags/category + 1 from different
+    const sameTag = bank.filter(c => c.word !== card.word && c.tags && c.tags === card.tags);
+    const diffTag = bank.filter(c => c.word !== card.word && (!c.tags || c.tags !== card.tags));
+    if (sameTag.length < 2 || !diffTag.length) return makeVocabQuestion(card, bank, 'mc-def');
+    const peers = shuffle(sameTag).slice(0,2);
+    const odd = shuffle(diffTag)[0];
+    const items = shuffle([card.word, ...peers.map(c=>c.word), odd.word]);
+    return {
+      type: 'odd-one-out',
+      prompt: 'Which word does NOT belong?',
+      image: null,
+      items,
+      oddIdx: items.indexOf(odd.word),
+      explanation: odd.tags ? '"' + odd.word + '" belongs to: ' + odd.tags : '"' + odd.word + '" is different'
+    };
+  }
+
+  if (type === 'true-false') {
+    // "This word means [definition]" — true or false (sometimes lie)
+    const lie = Math.random() > 0.5;
+    const wrongDef = lie ? (distractors[0]?.definition || 'something else') : card.definition;
+    const isTrue = !lie;
+    return {
+      type: 'true-false',
+      prompt: '"' + card.word + '" means: ' + wrongDef,
+      image: card.image || null,
+      answer: isTrue ? 'true' : 'false'
+    };
+  }
+
+  if (type === 'match') {
+    // Build a mini match set: 3–4 word↔definition pairs
+    const pool = shuffle([card, ...distractors]).slice(0,4);
+    const pairs = pool.map(c => [c.word, c.definition || c.translation || c.word]);
+    return {
+      type: 'match-opposites',
+      prompt: 'Match each word to its meaning:',
+      image: null,
+      pairs
+    };
+  }
+
+  if (type === 'dictation') {
+    return {
+      type: 'dictation',
+      prompt: 'Listen and write the word:',
+      image: card.image || null,
+      answer: card.word,
+      audioData: card.audioData || null
+    };
+  }
+
+  return null;
+}
+
+function previewVocabQuiz() {
+  const url = buildVocabQuizURL();
+  if (url) window.open(url, '_blank');
+}
+
+function buildVocabQR() {
+  const url = buildVocabQuizURL();
+  if (!url) return;
+  const out = document.getElementById('vb-qr-out'); out.innerHTML='';
+  try {
+    new QRCode(out, {
+      text: url, width:200, height:200,
+      colorDark:'#0c1a0e', colorLight:'#ffffff',
+      correctLevel: QRCode.CorrectLevel.L
+    });
+  } catch(e) {
+    out.innerHTML = '<p style="color:var(--muted);padding:10px">QR too large — use the link below.</p>';
+  }
+  const disp = document.getElementById('vb-qr-url');
+  disp.textContent = url.length > 100 ? url.slice(0,100)+'...' : url;
+  disp.dataset.full = url;
+  document.getElementById('vb-qr-area').classList.remove('hidden');
+}
+
+function copyVocabLink() {
+  const url = document.getElementById('vb-qr-url').dataset.full || '';
+  navigator.clipboard.writeText(url).then(()=>notify('LINK COPIED!')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=url;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();notify('LINK COPIED!');
+  });
+}
+
+
+
+
+
+async function publishVocabSet() {
+  if (vocabBank.length < 4) { notify('ADD AT LEAST 4 WORDS FIRST'); return; }
+  const count = parseInt(document.getElementById('vb-q-count').value)||20;
+  const coins = parseInt(document.getElementById('vb-coins').value)||10;
+  const selectedTypes = [...document.querySelectorAll('.vb-type-cb:checked')].map(cb=>cb.value);
+  if (!selectedTypes.length) { notify('SELECT AT LEAST ONE TYPE'); return; }
+  const btn = document.querySelector('[onclick="publishVocabSet()"]');
+  btn.disabled=true; btn.textContent='PUBLISHING...';
+  try {
+    const questions = generateVocabQuestions(vocabBank, count, selectedTypes);
+    const code = genCode();
+    await supaFetch('question_sets', {
+      method:'POST',
+      body: JSON.stringify({ code, name:'Vocab Quiz', questions, coins_per_q: coins })
+    });
+    document.getElementById('vb-pub-code').textContent = code;
+    document.getElementById('vb-code-result').classList.remove('hidden');
+    notify('PUBLISHED!');
+  } catch(e) { notify('ERROR: '+e.message); }
+  btn.disabled=false; btn.textContent='PUBLISH & GET CODE';
+}
+
+function copyVocabCode() {
+  const code = document.getElementById('vb-pub-code').textContent;
+  navigator.clipboard.writeText(code).then(()=>notify('CODE COPIED!')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=code;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();notify('CODE COPIED!');
+  });
+}
+
+// ── DUCK STORE ───────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════
+//  DUCK STORE
+// ═══════════════════════════════════════════════════════════════════
+const DUCKS = [
+  {id:'mallard',  name:'MALLARD',      cost:10,  pal:['#3a7a28','#1a5020','#e09020','#c8c040']},
+  {id:'rubber',   name:'RUBBER DUCK',  cost:15,  pal:['#f5d86e','#dab820','#e07010','#f5f090']},
+  {id:'mandarin', name:'MANDARIN',     cost:25,  pal:['#c84010','#f07020','#f0c040','#2a5a8a']},
+  {id:'teal',     name:'TEAL DUCK',    cost:30,  pal:['#18807a','#0e4a4a','#c47a10','#40c0b0']},
+  {id:'wood',     name:'WOOD DUCK',    cost:40,  pal:['#5a3010','#3a1e0a','#f0c040','#c84010']},
+  {id:'ninja',    name:'NINJA DUCK',   cost:50,  pal:['#1a1a1a','#080808','#303030','#606060']},
+  {id:'golden',   name:'GOLDEN DUCK',  cost:80,  pal:['#f5d86e','#c8a020','#e09020','#fffff0']},
+  {id:'disco',    name:'DISCO DUCK',   cost:100, pal:['#c060c0','#8030a0','#f0c040','#40c0f0']},
+];
+
+function drawDuck(canvas, duck, size) {
+  canvas.width = size; canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  const s = size / 56;
+  const [body, head, beak, acc] = duck.pal;
+  ctx.clearRect(0,0,size,size);
+  // water
+  ctx.fillStyle='#0a2a3a'; ctx.fillRect(0,Math.round(38*s),size,Math.round(18*s));
+  ctx.fillStyle='#0e4060'; ctx.fillRect(0,Math.round(38*s),size,Math.round(3*s));
+  // body
+  ctx.fillStyle=body; ctx.beginPath(); ctx.ellipse(28*s,36*s,18*s,10*s,0,0,Math.PI*2); ctx.fill();
+  // wing shine
+  ctx.fillStyle=acc; ctx.globalAlpha=.35;
+  ctx.beginPath(); ctx.ellipse(28*s,33*s,10*s,5*s,-0.2,0,Math.PI*2); ctx.fill();
+  ctx.globalAlpha=1;
+  // tail
+  ctx.fillStyle=body; ctx.beginPath(); ctx.moveTo(44*s,32*s); ctx.lineTo(50*s,26*s); ctx.lineTo(46*s,36*s); ctx.fill();
+  // neck
+  ctx.fillStyle=head; ctx.beginPath(); ctx.ellipse(18*s,28*s,6*s,9*s,0,0,Math.PI*2); ctx.fill();
+  // head
+  ctx.fillStyle=head; ctx.beginPath(); ctx.arc(16*s,20*s,9*s,0,Math.PI*2); ctx.fill();
+  // iridescent neck ring (mallard / teal)
+  if (duck.id==='mallard'||duck.id==='teal') {
+    ctx.strokeStyle='#a0f0d0'; ctx.lineWidth=1.5*s; ctx.globalAlpha=.5;
+    ctx.beginPath(); ctx.ellipse(18*s,25*s,5*s,3*s,0,0,Math.PI*2); ctx.stroke();
+    ctx.globalAlpha=1;
+  }
+  // eye white
+  ctx.fillStyle='#f0ead8'; ctx.beginPath(); ctx.arc(12*s,18*s,2.8*s,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#0a0a0a'; ctx.beginPath(); ctx.arc(11*s,18*s,1.4*s,0,Math.PI*2); ctx.fill();
+  // beak
+  ctx.fillStyle=beak; ctx.beginPath();
+  ctx.moveTo(6*s,20*s); ctx.lineTo(1*s,22*s); ctx.lineTo(6*s,24*s); ctx.lineTo(10*s,22*s); ctx.fill();
+  ctx.strokeStyle='#00000055'; ctx.lineWidth=.8*s;
+  ctx.beginPath(); ctx.moveTo(6*s,22*s); ctx.lineTo(10*s,22*s); ctx.stroke();
+  // extras
+  if (duck.id==='golden') {
+    ctx.fillStyle='#fffff0'; ctx.globalAlpha=.5;
+    for(let i=0;i<5;i++){ctx.beginPath();ctx.arc((6+i*9)*s,(5+Math.sin(i)*3)*s,1.5*s,0,Math.PI*2);ctx.fill();}
+    ctx.globalAlpha=1;
+  }
+  if (duck.id==='disco') {
+    const rc=['#ff4040','#40ff40','#4040ff','#ffff40','#ff40ff'];
+    rc.forEach((c,i)=>{ctx.fillStyle=c;ctx.globalAlpha=.7;ctx.fillRect((3+i*9)*s,3*s,6*s,6*s);});
+    ctx.globalAlpha=1;
+  }
+  if (duck.id==='ninja') {
+    ctx.fillStyle='#101010'; ctx.globalAlpha=.85;
+    ctx.fillRect(7*s,14*s,18*s,7*s); ctx.globalAlpha=1;
+    ctx.fillStyle='#ff3030';
+    ctx.beginPath(); ctx.arc(11*s,18*s,1.5*s,0,Math.PI*2); ctx.fill();
+  }
+}
+
+function drawCoin() {
+  const c = document.getElementById('coin-cvs');
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0,0,26,26);
+  ctx.fillStyle='#c47a10'; ctx.beginPath(); ctx.arc(13,13,11,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#f5b030'; ctx.beginPath(); ctx.arc(13,13,8,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#7a4010'; ctx.font='bold 11px monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('$',13,14);
+}
+
+function openStore() {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-store').classList.add('active');
+  renderStore();
+}
+
+function renderStore() {
+  document.getElementById('store-coin-lbl').textContent = quiz.coins + ' coins remaining';
+  const grid = document.getElementById('duck-grid'); grid.innerHTML='';
+  DUCKS.forEach(duck => {
+    const owned = quiz.owned.includes(duck.id);
+    const pricey = !owned && duck.cost > quiz.coins;
+    const card = document.createElement('div');
+    card.className = 'duck-card' + (owned?' owned':'') + (pricey?' pricey':'');
+    const cvs = document.createElement('canvas');
+    cvs.className='duck-cvs'; card.appendChild(cvs);
+    drawDuck(cvs, duck, 56);
+    card.innerHTML += `<div class="duck-name">${duck.name}</div><div class="duck-cost">${duck.cost} coins</div>`;
+    if (owned) card.innerHTML += `<div class="duck-badge">OWNED</div>`;
+    if (!owned && !pricey) card.onclick = () => buyDuck(duck);
+    grid.appendChild(card);
+  });
+  renderPond();
+}
+
+function buyDuck(duck) {
+  if (quiz.coins < duck.cost || quiz.owned.includes(duck.id)) return;
+  quiz.coins -= duck.cost;
+  quiz.owned.push(duck.id);
+  notify('YOU GOT A ' + duck.name + '!');
+  renderStore();
+}
+
+function renderPond() {
+  const pond = document.getElementById('pond'); pond.innerHTML='';
+  if (!quiz.owned.length) {
+    pond.innerHTML='<span class="pond-empty">Buy ducks to fill your pond!</span>'; return;
+  }
+  quiz.owned.forEach(id => {
+    const duck = DUCKS.find(d=>d.id===id);
+    if (!duck) return;
+    const c = document.createElement('canvas');
+    c.style.imageRendering='pixelated'; c.title=duck.name;
+    drawDuck(c, duck, 72); pond.appendChild(c);
+  });
+}
+
+
+
+// ── AI GENERATE ──────────────────────────────────────────────────
+// ── AI GENERATE ───────────────────────────────────────────────────────────────
+let generatedQuestions=[];
+const GEN_TYPES=['multiple-choice','true-false','fill-blank','unscramble','match-opposites','connections','correct-sentence','categorise','dictation','write-sentence'];
+const GTL={'multiple-choice':'Multiple Choice','true-false':'True/False','fill-blank':'Fill Blank','unscramble':'Unscramble','match-opposites':'Match Oppos.','connections':'Connections','correct-sentence':'Correct Sent.','categorise':'Categorise','dictation':'Dictation','write-sentence':'Write Sent.'};
+let selGT=new Set(['multiple-choice','true-false','fill-blank','unscramble','match-opposites','correct-sentence']);
+function initGen(){const el=document.getElementById('gen-type-opts');GEN_TYPES.forEach(t=>{const b=document.createElement('button');b.className='gopt'+(selGT.has(t)?' on':'');b.textContent=GTL[t];b.onclick=()=>{if(selGT.has(t)){selGT.delete(t);b.classList.remove('on');}else{selGT.add(t);b.classList.add('on');}};el.appendChild(b);});}
+async function runGenerate(){
+  const topic=document.getElementById('gen-topic').value.trim();if(!topic){alert('Enter a topic.');return;}
+  const count=parseInt(document.getElementById('gen-count').value)||8,details=document.getElementById('gen-details').value.trim(),types=[...selGT];
+  if(!types.length){alert('Select at least one type.');return;}
+  const wi=document.getElementById('gen-images-toggle').checked;
+  document.getElementById('gen-btn').disabled=true;document.getElementById('gen-btn').textContent='GENERATING...';
+  document.getElementById('gen-status-panel').style.display='block';document.getElementById('gen-preview').innerHTML='<p style="color:var(--muted)">Generating...</p>';
+  setP(10);setS('Calling AI...');
+  const sys=`You are an ESL question designer. Generate exactly ${count} questions about the given topic.
+Output ONLY a valid JSON array — no markdown, no preamble, no explanation.
+Type schemas:
+multiple-choice: {"type":"multiple-choice","prompt":"...","choices":["A","B","C","D"],"answer":0}
+true-false: {"type":"true-false","prompt":"...","answer":"true"}
+fill-blank: {"type":"fill-blank","prompt":"She ___ to school.","answer":"goes"}
+unscramble: {"type":"unscramble","prompt":"Arrange:","sentence":"Full correct sentence"}
+match-opposites: {"type":"match-opposites","prompt":"Match:","pairs":[["hot","cold"],["fast","slow"]]}
+connections: {"type":"connections","prompt":"Match:","pairs":[["apple","Fruit"],["dog","Animal"]]}
+correct-sentence: {"type":"correct-sentence","prompt":"","sentence":"She go to school.","correction":"She goes to school."}
+categorise: {"type":"categorise","prompt":"Sort:","categories":["Cat1","Cat2"],"items":[{"word":"item","cat":"Cat1"}]}
+write-sentence: {"type":"write-sentence","prompt":"Example sentence.","wordPrompt":"although"}
+dictation: {"type":"dictation","prompt":"Listen:","answer":"The transcript","audioData":null}
+Rules: Use ONLY: ${types.join(', ')}. Vary types. match-opposites/connections: 4+ pairs. categorise: 6+ items. Add "imageQuery":"3-5 word search" where visual helps.${details?` Extra: ${details}`:''}`;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,system:sys,messages:[{role:'user',content:`Generate ${count} questions about: ${topic}`}]})});
+    setP(50);setS('Parsing...');const data=await r.json();const raw=(data.content||[]).map(b=>b.text||'').join('');
+    let qs;try{qs=JSON.parse(raw.replace(/```json|```/g,'').trim());}catch(e){setS('Parse error: '+e.message);resetBtn();return;}
+    setP(70);setS(wi?`Got ${qs.length} questions. Fetching images...`:`Got ${qs.length} questions.`);generatedQuestions=qs;
+    if(wi){const jobs=qs.map((q,i)=>({i,query:q.imageQuery})).filter(j=>j.query);let done=0;await Promise.all(jobs.map(async({i,query})=>{try{const ir=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,system:'Return ONLY JSON: {"url":"https://..."} — a direct Wikimedia Commons or public domain image URL. No markdown.',messages:[{role:'user',content:`Image URL for: ${query}`}]})});const id=await ir.json();const it=(id.content||[]).map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();try{const p=JSON.parse(it);if(p.url)qs[i].image=p.url;}catch(_){}}catch(_){}done++;setS(`Images: ${done}/${jobs.length}`);setP(70+Math.round((done/Math.max(jobs.length,1))*25));}));}
+    setP(100);setS('Done.');renderGenPrev(qs);document.getElementById('gen-actions').style.display='flex';document.getElementById('gen-set-name').value=topic;
+  }catch(e){setS('Error: '+e.message);}resetBtn();
+}
+function renderGenPrev(qs){const el=document.getElementById('gen-preview');el.innerHTML='';qs.forEach((q,i)=>{const card=document.createElement('div');card.className='gqc';let d='';if(q.type==='multiple-choice')d=q.choices?.map((c,ci)=>`<span style="color:${ci===q.answer?'var(--pur3)':'var(--muted)'}">${ci===q.answer?'[OK] ':''} ${c}</span>`).join(' ')||'';else if(q.type==='true-false')d=`Answer: <strong style="color:var(--pur3)">${q.answer}</strong>`;else if(q.type==='fill-blank')d=`Answer: <strong style="color:var(--pur3)">${q.answer}</strong>`;else if(q.type==='unscramble')d=`<em style="color:var(--pur3)">${q.sentence}</em>`;else if(q.type==='match-opposites'||q.type==='connections')d=(q.pairs||[]).map(p=>`<span style="color:var(--muted)">${p[0]}-${p[1]}</span>`).join(' ');else if(q.type==='correct-sentence')d=`<em style="color:var(--pur3)">${q.correction}</em>`;else if(q.type==='categorise')d=(q.items||[]).map(it=>`<span style="color:var(--muted)">${it.word}-${it.cat}</span>`).join(' ');else if(q.type==='write-sentence')d=`Word: <strong style="color:var(--yel)">${q.wordPrompt}</strong>`;else if(q.type==='dictation')d=`<em style="color:var(--pur3)">${q.answer}</em>`;const ih=q.image?`<img style="width:100%;max-height:80px;object-fit:cover;margin-top:6px;border:2px solid var(--border)" src="${q.image}" onerror="this.style.display='none'" alt="">`:(q.imageQuery?`<div style="color:var(--muted);font-size:.75rem;margin-top:4px">img: "${q.imageQuery}"</div>`:'');card.innerHTML=`<div class="gtag">${GTL[q.type]||q.type}</div><div class="gpmt">${i+1}. ${q.prompt||q.sentence||q.wordPrompt||''}</div><div class="gdet">${d}</div>${ih}`;el.appendChild(card);});}
+function importGenerated(){const name=document.getElementById('gen-set-name').value.trim()||'AI Set';if(!generatedQuestions.length)return;const cl=generatedQuestions.map(q=>{const c={...q};delete c.imageQuery;return c;});sets.push({name,questions:cl});saveAll();notify('IMPORTED: '+name);currentSetIdx=sets.length-1;document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('screen-editor').classList.add('active');document.querySelectorAll('.tab-btn')[0].classList.add('active');loadSet(currentSetIdx);}
+function setP(p){document.getElementById('gen-progress').style.width=p+'%';}
+function setS(m){document.getElementById('gen-stream').textContent=m;}
+function resetBtn(){const b=document.getElementById('gen-btn');b.disabled=false;b.textContent='GENERATE';}
+
+
+
+
+
+// ── UTILS ────────────────────────────────────────────────────────
+function shuffle(a){return[...a].sort(()=>Math.random()-.5);}
+function notify(msg){const n=document.createElement('div');n.className='notif';n.textContent=msg;document.body.appendChild(n);setTimeout(()=>n.remove(),2200);}
+function showAR(){const a=document.getElementById('ar');if(a)a.style.display='block';}
+function setP(p){document.getElementById('gen-progress').style.width=p+'%';}
+function setS(m){document.getElementById('gen-stream').textContent=m;}
+function resetBtn(){const b=document.getElementById('gen-btn');b.disabled=false;b.textContent='GENERATE';}
+
+// ── BOOT ─────────────────────────────────────────────────────────
+if (!initStudentMode()) {
+  initEditor();
+  initGen();
+  initVocabTab();
+  drawCoin();
+}
+</script>
+</body>
+</html>
